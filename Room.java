@@ -9,13 +9,25 @@ class Room extends JPanel {
     HotCorner rb;
     int borderwidth = 0;
     int gridSize = 10;
+    int [] new_room_coords;
     //int gridSize;
     // popup menu
     JPopupMenu popup = new JPopupMenu();
     JMenuItem rotate = new JMenuItem("Rotate");
     JMenuItem delete = new JMenuItem("Delete");
-
+    JMenuItem add_room = new JMenuItem("Add Room");
     JMenuItem furniture = new JMenuItem("Furniture");
+    // once add_room is decided, we need to decide which side the room will be added to
+    JPopupMenu side_popup = new JPopupMenu();
+    JMenuItem left = new JMenuItem("Left");
+    JMenuItem right = new JMenuItem("Right");
+    JMenuItem top = new JMenuItem("Top");
+    JMenuItem bottom = new JMenuItem("Bottom");
+
+    // we need to decide whether the new room will be center left top right or bottom alligned
+    JPopupMenu orientation_popup = new JPopupMenu();
+    JMenuItem center = new JMenuItem("Center");
+
 
 
     public Room(Color x, Canvas canvass) {
@@ -32,7 +44,13 @@ class Room extends JPanel {
 
         this.setBorder(BorderFactory.createLineBorder(Color.BLACK, borderwidth, true));
 
-        // initialising popup:
+        // initialising side popup
+        side_popup.add(left);
+        side_popup.add(right);
+        side_popup.add(top);
+        side_popup.add(bottom);
+
+        // initialising rightclick popup:
         // rotate option
         popup.add(rotate);
         rotate.addActionListener(e -> {
@@ -40,13 +58,28 @@ class Room extends JPanel {
         });
         // delete option
         popup.add(delete);
+
         delete.addActionListener(e -> {
             canvas.remove(this);
             canvas.revalidate();
             canvas.repaint();
         });
+        popup.add(add_room);
+
+        add_room.addActionListener( e ->{
+            System.out.println("side popup trigger");
+            JPopupMenu parentPanel = ((JPopupMenu)(((JMenuItem) e.getSource()).getParent()).getParent());
+            side_popup.show(canvas, this.getX(), this.getY());
+        });
+
+
         // furniture pane TODO
         popup.add(furniture);
+
+
+        // initialising the orientation popup will be done once side option is selected
+
+
 
         // hotcorners
         //  lt
@@ -59,6 +92,7 @@ class Room extends JPanel {
 
 
         // Mouse adapter functionality
+        // pressed
         MouseAdapter mouse = new MouseAdapter() {
 
             boolean connected = false;
@@ -76,23 +110,19 @@ class Room extends JPanel {
             public void mousePressed(MouseEvent e) {
                 X = e.getX();
                 Y = e.getY();
-                initialX = getX();
-                initialY = getY();
+                initialX = getX(); // for overlap check
+                initialY = getY(); // for overlap check
                 //System.out.println("mouse pressed on"+e.getComponent());
             }
 
             public void mouseDragged(MouseEvent e) {
 
-
-
-
-
                 // set location
-                Nearby nearbyroom = isroomnearby();
+                Nearby nearbyroom = isroomnearby(); // check if a room is nearby or not
 
-
+                // if there is a room nearby
                 if (nearbyroom != null) {
-
+                    // if the room is NOT connected to another room
                     if (!connected) {
                         switch(nearbyroom.side){
                             case "l":
@@ -137,16 +167,22 @@ class Room extends JPanel {
                                 connectionY = e.getY();
                                 break;
                         }
-                    }else {
+                    }
+                    // the room is connected to another room
+                    else {
                         String side = areconnected(nearbyroom.room);
-                        if (side == null) {
+                        if (side == null) { // making sure there is room connected at some side (tb or s) top_bottom  or side
                             System.out.println("\n\n\n\nwhat's happening here");
-                            connected = false;
+                            connected = false; // we need to figure out why this line is holding back a weird bug
                         } else {
+                            // checks to see that the mouse has moved enough to indicate that the user doesn't want to snap.
+                            // in which case we disengage the snap function
                             switch (side) {
                                 case "s":
                                     if (e.getX() - connectionX > 20 || e.getX() - connectionX < -20) {
+                                        // not connected anymore
                                         connected = false;
+                                        // regular coords mechanism
                                         // find new x coord wrt grid size
                                         NewX = Math.floorDiv(getX() + e.getX() - X, gridSize) * gridSize;
                                         // find new y coord wrt grid size
@@ -157,7 +193,9 @@ class Room extends JPanel {
                                     break;
                                 case "tb":
                                     if (e.getY() - connectionY > 20 || e.getY() - connectionY < -20) {
+                                        // not connected anymore
                                         connected = false;
+                                        // regular coords mechanism
                                         // find new x coord wrt grid size
                                         NewX = Math.floorDiv(getX() + e.getX() - X, gridSize) * gridSize;
                                         // find new y coord wrt grid size
@@ -172,13 +210,11 @@ class Room extends JPanel {
                         }
                     }
 
-                    System.out.println("nearbyroom,"+nearbyroom.side+" "+e.getX()+" "+e.getY());
+                    //System.out.println("nearbyroom,"+nearbyroom.side+" "+e.getX()+" "+e.getY());
 
-
-
-
-
-                }else{
+                }
+                // there is no room nearby
+                else{
                     // find new x coord wrt grid size
                     NewX = Math.floorDiv(getX() + e.getX() - X, gridSize) * gridSize;
                     // find new y coord wrt grid size
@@ -186,38 +222,28 @@ class Room extends JPanel {
 
                 }
 
+
                 setLocation(NewX, newY);
                 //int moveX = NewX - getX();
                 //int moveY = newY-getY();
 
-
-
-
-
-
-                //int mouselocX = e.getLocationOnScreen().x+moveX;
-                //int mouselocY = e.getLocationOnScreen().y+moveY;
-                //System.out.println(mouselocX+" "+mouselocY);
-                // moving mouse to new location
-                //robot.mouseMove(mouselocX, mouselocY);
-
-                // ensuring the room being dragged is on top (it shouldn't overlap ideally)
-                // this part will change too in the final version
-                // TODO: MAKE THIS BETTER/ GET RID after overlap checks are in place
+                // makes sure the object being moved around is on top. (z axis wise)
                 canvas.setComponentZOrder(e.getComponent(), 0);
             }
 
             @Override
             // overlap check goes here
             public void mouseReleased(MouseEvent e) {
-                if (room_overlap(NewX, newY, NewX + getWidth(), newY + getHeight())) {
+                if (room_overlap()) {
                     System.out.println("room overlap");
                     setLocation(initialX, initialY);
+                    Canvas.showDialog(canvas.frame,"ROOM OVERLAP!");
                 } else {
                     System.out.println("room not overlap");
                 }
             }
-            // rightclick to get options pane
+
+            // rightclick to get options pane // this or have a panel on the left side of the screen (discuss with hanes and varun)
             public void mouseClicked(MouseEvent e) {
                 // check for right click
                 if (SwingUtilities.isRightMouseButton(e)) {
@@ -239,7 +265,11 @@ class Room extends JPanel {
     }
 
     // room overlap checker
-    public boolean room_overlap(int lt_roomX, int lt_roomY, int rb_roomX, int rb_roomY) {
+    public boolean room_overlap() {
+        int lt_roomX = getX();
+        int lt_roomY = getY();
+        int rb_roomX = getX()+getWidth();
+        int rb_roomY = getY()+getWidth();
         boolean overlap = false;
         //canvas.rooms.remove(this); // TODO : THIS WILL CAUSE PROBLEMS
         //
@@ -279,24 +309,17 @@ class Room extends JPanel {
     }
 
     public String areconnected(Room room){
-
-                if(room.getY()+room.getHeight()==getY()){
+                    // bottom                               // top
+                if(room.getY()+room.getHeight()==getY() || getY()+getHeight()==room.getY()){
+                    System.out.println("tb match;");
                     return "tb";
-                }
 
-                if(room.getX()==getX()+getWidth()) {
+                }
+                        // left                            // right
+                else if(room.getX()==getX()+getWidth() || getX()==room.getX()+room.getWidth()) {
+                    System.out.println("s match;"+getY());
                     return "s";
                 }
-
-                if(getY()+getHeight()==room.getY()){
-                    return "tb";
-                }
-
-
-                if(getX()==room.getX()+room.getWidth()) {
-                    return "s";
-                }
-
 
         return null;
     }
@@ -391,9 +414,6 @@ class Room extends JPanel {
     }
 
 
-
-    // to enable resizing
-
 }
 
 
@@ -410,24 +430,22 @@ class HotCorner extends JPanel {
         MouseAdapter hotcornermouse = new MouseAdapter() {
             final int minsize = 40;
 
-            final Robot robot; // used to change mouse location
-
-            {
-                try {
-                    robot = new Robot();
-                } catch (AWTException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-
             int X;// mouse coords
             int Y;// mouse coords
+            int intialx;
+            int intialy;
+            int initiallen;
+            int initialwid;
 
             public void mousePressed(MouseEvent e) {
                 // this function will let us know that the mouse pressed on the hotcorner and get it's coords
                 X = e.getX();
                 Y = e.getY();
                 //System.out.println("hotcorner presssed");
+                intialx = owner.getX();
+                intialy = owner.getY();
+                initiallen = owner.getHeight();
+                initialwid = owner.getWidth();
             }
 
             public void mouseDragged(MouseEvent e) {
@@ -485,6 +503,7 @@ class HotCorner extends JPanel {
                         break;
                 }
 
+
                 // bringing the room in question up so it's easier to work with
                 // TODO: DELETE THIS LATER
                 owner.setComponentZOrder(e.getComponent(), 0);
@@ -492,47 +511,52 @@ class HotCorner extends JPanel {
 
             }
 
-            // this function deals with snapping to the grid and yeah that's pretty much it.
+            // this function deals with snapping to the grid
             public void mouseReleased(MouseEvent e) {
                 int newYcoord;
                 int newXcoord;
                 int newWidth;
                 int newHeight;
-                switch (corner) {
-                    //we want the corners to snap inwards, i.e the area of the room should only get smaller
-                    // as opposed to bigger because I believe it'll be easier on the overlap checker if we do this
-                    // also decreases the likelihood of the overlap checker being called in the first place
-                    case "lt":
-                        newYcoord = Math.floorDiv(owner.getY(), gridSize) * gridSize;
-                        if (newYcoord > owner.getY()) {
-                            newYcoord -= 10;
-                        }
-                        newXcoord = Math.floorDiv(owner.getX(), gridSize) * gridSize;
-                        if (newXcoord < owner.getX()) {
-                            newXcoord += 10;
-                        }
+                if (!owner.room_overlap()) {
+                    switch (corner) {
+                        //we want the corners to snap inwards, i.e the area of the room should only get smaller
+                        // as opposed to bigger because I believe it'll be easier on the overlap checker if we do this
+                        // also decreases the likelihood of the overlap checker being called in the first place
+                        case "lt":
+                            newYcoord = Math.floorDiv(owner.getY(), gridSize) * gridSize;
+                            if (newYcoord > owner.getY()) {
+                                newYcoord -= 10;
+                            }
+                            newXcoord = Math.floorDiv(owner.getX(), gridSize) * gridSize;
+                            if (newXcoord < owner.getX()) {
+                                newXcoord += 10;
+                            }
 
-                        newWidth = owner.getWidth() + (owner.getX() - newXcoord);
-                        newHeight = owner.getHeight() + (owner.getY() - newYcoord);
-                        // TODO :OVERLAP CHECK
-                        if (newWidth > 20 && newHeight > 20) {
+                            newWidth = owner.getWidth() + (owner.getX() - newXcoord);
+                            newHeight = owner.getHeight() + (owner.getY() - newYcoord);
+                            // TODO :OVERLAP CHECK
+                            if (newWidth > 20 && newHeight > 20) {
+                                owner.setSize(newWidth, newHeight);
+                                owner.setLocation(newXcoord, newYcoord);
+                                // setting rb to the right bottom corner yet again- yes it's pretty annoying,
+                                // and yes it's necessary because we have to change the width of the room when we're pulling lt
+                                owner.rb.setLocation(owner.getWidth() - 10 - borderwidth, owner.getHeight() - 10 - borderwidth);
+                            }
+
+                            break;
+                        case "rb":
+                            newWidth = Math.floorDiv(owner.getWidth(), gridSize) * gridSize;
+                            newHeight = Math.floorDiv(owner.getHeight(), gridSize) * gridSize;
                             owner.setSize(newWidth, newHeight);
-                            owner.setLocation(newXcoord, newYcoord);
-                            // setting rb to the right bottom corner yet again- yes it's pretty annoying,
-                            // and yes it's necessary because we have to change the width of the room when we're pulling lt
-                            owner.rb.setLocation(owner.getWidth() - 10 - borderwidth, owner.getHeight() - 10 - borderwidth);
-                        } else {
-                            robot.mouseMove(X, Y);
-                        }
+                            setLocation(owner.getWidth() - 10 - borderwidth, owner.getHeight() - 10 - borderwidth);
+                    }
 
-                        break;
-                    case "rb":
-                        newWidth = Math.floorDiv(owner.getWidth(), gridSize) * gridSize;
-                        newHeight = Math.floorDiv(owner.getHeight(), gridSize) * gridSize;
-                        owner.setSize(newWidth, newHeight);
-                        setLocation(owner.getWidth() - 10 - borderwidth, owner.getHeight() - 10 - borderwidth);
+                }else{
+                    owner.setLocation(intialx, intialy);
+                    owner.setSize(initialwid,initiallen);
+                    owner.rb.setLocation(owner.getWidth() - 10 - borderwidth, owner.getHeight() - 10 - borderwidth);
+                    Canvas.showDialog(owner.canvas.frame,"ROOM OVERLAP!");
                 }
-
             }
         };
         addMouseListener(hotcornermouse);

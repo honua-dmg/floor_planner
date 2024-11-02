@@ -7,7 +7,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 // import java.awt.event.MouseAdapter;
 // import java.awt.event.MouseEvent;
-
+/*
 public class Overview extends JFrame{
     ArrayList<Room> rooms = new ArrayList<Room>();
     Canvas canvas;
@@ -64,5 +64,5 @@ class Controls extends JPanel{
 }
 
 
-
+*/
 
