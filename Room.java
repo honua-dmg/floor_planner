@@ -7,8 +7,8 @@ class Room extends JPanel {
     Canvas canvas;
     HotCorner lt;
     HotCorner rb;
-    int borderwidth = 0;
-    int gridSize = 10;
+    int borderwidth;
+    int gridSize;
     int [] new_room_coords;
     //int gridSize;
     // popup menu
@@ -26,12 +26,78 @@ class Room extends JPanel {
 
     // we need to decide whether the new room will be center left top right or bottom alligned
     JPopupMenu orientation_popup = new JPopupMenu();
-    JMenuItem center = new JMenuItem("Center");
+    JMenuItem allign_centerX = new JMenuItem("Center");
+    JMenuItem allign_centerY = new JMenuItem("Center");
+    JMenuItem allign_top = new JMenuItem("Top");
+    JMenuItem allign_bottom = new JMenuItem("Bottom");
+    JMenuItem allign_left = new JMenuItem("Left");
+    JMenuItem allign_right = new JMenuItem("Right");
+
+    public void orientation_options(String side){
+        switch(side){
+            case "Left":
+                orientation_popup.add(allign_top);
+                orientation_popup.add(allign_centerY);
+                orientation_popup.add(allign_bottom);
+                canvas.room_coords[0] = this.getX()-canvas.standard_room_width;
+                break;
+            case "Right":
+                orientation_popup.add(allign_top);
+                orientation_popup.add(allign_centerY);
+                orientation_popup.add(allign_bottom);
+                canvas.room_coords[0] = this.getX()+this.getWidth();
+                break;
+            case "Top":
+                orientation_popup.add(allign_left);
+                orientation_popup.add(allign_centerX);
+                orientation_popup.add(allign_right);
+                canvas.room_coords[1] = this.getY()-canvas.standard_room_height;
+                break;
+            case "Bottom":
+                orientation_popup.add(allign_left);
+                orientation_popup.add(allign_centerX);
+                orientation_popup.add(allign_right);
+                canvas.room_coords[1] = this.getY()+this.getHeight();
+        }
+        orientation_popup.show(canvas, this.getX(), this.getY());
+    }
+
+    public void alignment(String type){
+        switch(type){
+            case "left":
+
+                canvas.room_coords[0] = this.getX();
+                break;
+            case "right":
+                canvas.room_coords[0] = this.getX()+this.getWidth()-canvas.standard_room_width;
+                break;
+            case "top":
+                canvas.room_coords[1] = this.getY();
+                break;
+            case "bottom":
+                canvas.room_coords[1] = this.getY()+this.getHeight()-canvas.standard_room_height;
+                break;
+            case "centerX":
+                int newX = Math.floorDiv(canvas.standard_room_width/2,10)*10;;
+                canvas.room_coords[0] = this.getX()+Math.floorDiv(this.getWidth()/2,10)*10-newX;
+                break;
+            case "centerY":
+                int newY = Math.floorDiv(canvas.standard_room_height/2,10)*10;;
+                canvas.room_coords[1]= this.getY()+Math.floorDiv(this.getHeight()/2,10)*10-newY;
+                break;
+
+        }
+        System.out.println("X,Y:"+getX()+","+getY()+" NewX,NewY:"+canvas.room_coords[0]+","+canvas.room_coords[1]);
+        canvas.wrt_room = true;
+        orientation_popup.removeAll();
+
+    }
 
 
-
-    public Room(Color x, Canvas canvass) {
+    public Room(Color x, Canvas canvass,int gridSize,int borderwidth) {
         canvas = canvass;
+        this.gridSize = gridSize;
+        this.borderwidth = borderwidth;
         //Basic setup
         setLayout(null);
         setSize(100, 50);
@@ -42,7 +108,7 @@ class Room extends JPanel {
 
         // borders
 
-        this.setBorder(BorderFactory.createLineBorder(Color.BLACK, borderwidth, true));
+        this.setBorder(BorderFactory.createLineBorder(Color.BLACK, 2, true));
 
         // initialising side popup
         side_popup.add(left);
@@ -67,12 +133,41 @@ class Room extends JPanel {
         popup.add(add_room);
 
         add_room.addActionListener( e ->{
-            System.out.println("side popup trigger");
-            JPopupMenu parentPanel = ((JPopupMenu)(((JMenuItem) e.getSource()).getParent()).getParent());
             side_popup.show(canvas, this.getX(), this.getY());
         });
 
+        left.addActionListener(e -> {
+            orientation_options("Left");
+        });
+        right.addActionListener(e -> {
+            orientation_options("Right");
+        });
+        top.addActionListener(e -> {
+            orientation_options("Top");
+        });
+        bottom.addActionListener(e -> {
+            orientation_options("Bottom");
+        });
 
+        allign_centerX.addActionListener(e -> {
+            alignment("centerX");
+        });
+
+        allign_centerY.addActionListener(e -> {
+            alignment("centerY");
+        });
+        allign_left.addActionListener(e -> {
+            alignment("left");
+        });
+        allign_right.addActionListener(e -> {
+            alignment("right");
+        });
+        allign_top.addActionListener(e -> {
+            alignment("top");
+        });
+        allign_bottom.addActionListener(e -> {
+            alignment("bottom");
+        });
         // furniture pane TODO
         popup.add(furniture);
 
@@ -262,14 +357,21 @@ class Room extends JPanel {
     public void rotate() {
         setBounds(getX(), getY(), getHeight(), getWidth());
         rb.setLocation(getWidth() - 10 - borderwidth, getHeight() - 10 - borderwidth);
+        if(room_overlap()){
+            canvas.showDialog(canvas.frame,"ROOM OVERLAP!");
+            setBounds(getX(),getY(),getHeight(),getWidth());
+            rb.setLocation(getWidth() - 10 - borderwidth, getHeight() - 10 - borderwidth);
+        }
+
+
     }
 
     // room overlap checker
-    public boolean room_overlap() {
+    public  boolean room_overlap() {
         int lt_roomX = getX();
         int lt_roomY = getY();
         int rb_roomX = getX()+getWidth();
-        int rb_roomY = getY()+getWidth();
+        int rb_roomY = getY()+getHeight();
         boolean overlap = false;
         //canvas.rooms.remove(this); // TODO : THIS WILL CAUSE PROBLEMS
         //
@@ -282,13 +384,11 @@ class Room extends JPanel {
             int rb_otherX = room.getX() + room.getWidth();
             int rb_otherY = room.getY() + room.getHeight();
 
-            if (overlap(lt_roomX, lt_roomY, rb_roomX, rb_roomY,
-                    lt_otherX, lt_otherY, rb_otherX, rb_otherY)) {
-                overlap = true;
-            }
             if (overlap(lt_otherX, lt_otherY, rb_otherX, rb_otherY,
                     lt_roomX, lt_roomY, rb_roomX, rb_roomY)) {
                 overlap = true;
+                System.out.println(getX()+","+getY()+":"+(getX()+getWidth())+","+(getY()+getHeight()));
+                System.out.println(room.getX()+","+room.getY()+":"+(room.getX()+room.getWidth())+","+(room.getY()+room.getHeight()));
             }
         }
 
@@ -298,6 +398,7 @@ class Room extends JPanel {
     // generic overlap
     public boolean overlap(int ltx1, int lty1, int rbx1, int rby1,
                            int ltx2, int lty2, int rbx2, int rby2) {
+        /*
         boolean overlap = false;
         if (ltx1 < rbx2 && rbx1 > ltx2) {
             if (rby1 > lty2 && lty1 < rby2) {
@@ -306,18 +407,21 @@ class Room extends JPanel {
 
         }
         return overlap;
+
+         */
+        return (ltx1 < rbx2 && rbx1 > ltx2 && lty1 < rby2 && rby1 > lty2);
     }
 
     public String areconnected(Room room){
                     // bottom                               // top
                 if(room.getY()+room.getHeight()==getY() || getY()+getHeight()==room.getY()){
-                    System.out.println("tb match;");
+                    //System.out.println("tb match;");
                     return "tb";
 
                 }
                         // left                            // right
                 else if(room.getX()==getX()+getWidth() || getX()==room.getX()+room.getWidth()) {
-                    System.out.println("s match;"+getY());
+                    //System.out.println("s match;"+getY());
                     return "s";
                 }
 
@@ -413,17 +517,14 @@ class Room extends JPanel {
         }
     }
 
-
 }
-
-
 
 class HotCorner extends JPanel {
     int gridSize;
     int borderwidth;
 
     public HotCorner(Room owner, String corner, Color x,int gridSize,int borderwidth) {
-        setBackground(Color.BLACK); // TODO: DELETE THIS LATER
+        setBackground(Color.PINK); // TODO: DELETE THIS LATER
         this.gridSize = gridSize;
         this.borderwidth= borderwidth;
         // most of the work is done here:
@@ -517,41 +618,44 @@ class HotCorner extends JPanel {
                 int newXcoord;
                 int newWidth;
                 int newHeight;
-                if (!owner.room_overlap()) {
-                    switch (corner) {
-                        //we want the corners to snap inwards, i.e the area of the room should only get smaller
-                        // as opposed to bigger because I believe it'll be easier on the overlap checker if we do this
-                        // also decreases the likelihood of the overlap checker being called in the first place
-                        case "lt":
-                            newYcoord = Math.floorDiv(owner.getY(), gridSize) * gridSize;
-                            if (newYcoord > owner.getY()) {
-                                newYcoord -= 10;
-                            }
-                            newXcoord = Math.floorDiv(owner.getX(), gridSize) * gridSize;
-                            if (newXcoord < owner.getX()) {
-                                newXcoord += 10;
-                            }
 
-                            newWidth = owner.getWidth() + (owner.getX() - newXcoord);
-                            newHeight = owner.getHeight() + (owner.getY() - newYcoord);
-                            // TODO :OVERLAP CHECK
-                            if (newWidth > 20 && newHeight > 20) {
-                                owner.setSize(newWidth, newHeight);
-                                owner.setLocation(newXcoord, newYcoord);
-                                // setting rb to the right bottom corner yet again- yes it's pretty annoying,
-                                // and yes it's necessary because we have to change the width of the room when we're pulling lt
-                                owner.rb.setLocation(owner.getWidth() - 10 - borderwidth, owner.getHeight() - 10 - borderwidth);
-                            }
+                switch (corner) {
+                    //we want the corners to snap inwards, i.e the area of the room should only get smaller
+                    // as opposed to bigger because I believe it'll be easier on the overlap checker if we do this
+                    // also decreases the likelihood of the overlap checker being called in the first place
+                    case "lt":
+                        newYcoord = Math.floorDiv(owner.getY(), gridSize) * gridSize;
 
-                            break;
-                        case "rb":
-                            newWidth = Math.floorDiv(owner.getWidth(), gridSize) * gridSize;
-                            newHeight = Math.floorDiv(owner.getHeight(), gridSize) * gridSize;
+                        if (newYcoord < owner.getY()) {
+                            newYcoord += 10;
+                        }
+
+                        newXcoord = Math.floorDiv(owner.getX(), gridSize) * gridSize;
+                        if (newXcoord < owner.getX()) {
+                            newXcoord += 10;
+                        }
+
+                        newWidth = owner.getWidth() + (owner.getX() - newXcoord);
+                        newHeight = owner.getHeight() + (owner.getY() - newYcoord);
+                        // TODO :OVERLAP CHECK
+                        if (newWidth > 20 && newHeight > 20) {
                             owner.setSize(newWidth, newHeight);
-                            setLocation(owner.getWidth() - 10 - borderwidth, owner.getHeight() - 10 - borderwidth);
-                    }
+                            owner.setLocation(newXcoord, newYcoord);
+                            // setting rb to the right bottom corner yet again- yes it's pretty annoying,
+                            // and yes it's necessary because we have to change the width of the room when we're pulling lt
+                            owner.rb.setLocation(owner.getWidth() - 10 - borderwidth, owner.getHeight() - 10 - borderwidth);
+                        }
 
-                }else{
+                        break;
+                    case "rb":
+                        newWidth = Math.floorDiv(owner.getWidth(), gridSize) * gridSize;
+                        newHeight = Math.floorDiv(owner.getHeight(), gridSize) * gridSize;
+                        owner.setSize(newWidth, newHeight);
+                        setLocation(owner.getWidth() - 10 - borderwidth, owner.getHeight() - 10 - borderwidth);
+                }
+
+
+                if(owner.room_overlap()){
                     owner.setLocation(intialx, intialy);
                     owner.setSize(initialwid,initiallen);
                     owner.rb.setLocation(owner.getWidth() - 10 - borderwidth, owner.getHeight() - 10 - borderwidth);
