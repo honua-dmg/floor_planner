@@ -15,13 +15,13 @@ class Canvas extends JPanel {
     int gridsize=10;
     int borderwidth=0;
 
-    public Canvas(JFrame frame) {
+    public Canvas() {
         rooms = new ArrayList<>();
         setLayout(null);
         setSize(600, 500);
         setBackground(Color.WHITE);
         setVisible(true);
-        this.frame = frame;
+
     }
 
 
@@ -167,7 +167,7 @@ class tempFrame extends JFrame {
         setVisible(true);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         // creating canvas object
-        canvasClass = new Canvas(this);
+        canvasClass = new Canvas();
         // Buttons
         JButton RedRoom = new JButton("Add Red Element");
         add(RedRoom);

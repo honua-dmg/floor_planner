@@ -5,6 +5,7 @@ import java.awt.event.*;
 
 class Room extends JPanel {
     Canvas canvas;
+    Canvas furniture_canvas;
     HotCorner lt;
     HotCorner rb;
     int borderwidth;
@@ -16,6 +17,7 @@ class Room extends JPanel {
     JMenuItem rotate = new JMenuItem("Rotate");
     JMenuItem delete = new JMenuItem("Delete");
     JMenuItem add_room = new JMenuItem("Add Room");
+    JMenuItem resize = new JMenuItem("Resize");
     JMenuItem furniture = new JMenuItem("Furniture");
     // once add_room is decided, we need to decide which side the room will be added to
     JPopupMenu side_popup = new JPopupMenu();
@@ -104,7 +106,8 @@ class Room extends JPanel {
         setPreferredSize(new Dimension(100, 50));
         setBackground(x);
         setVisible(true);
-
+        furniture_canvas = new Canvas();
+        furniture_canvas.setBackground(x);
 
         // borders
 
@@ -171,6 +174,10 @@ class Room extends JPanel {
         // furniture pane TODO
         popup.add(furniture);
 
+        popup.add(resize);
+        resize.addActionListener(e -> {
+
+        });
 
         // initialising the orientation popup will be done once side option is selected
 
@@ -273,7 +280,7 @@ class Room extends JPanel {
                             // checks to see that the mouse has moved enough to indicate that the user doesn't want to snap.
                             // in which case we disengage the snap function
                             switch (side) {
-                                case "s":
+                                case "l":
                                     if (e.getX() - connectionX > 20 || e.getX() - connectionX < -20) {
                                         // not connected anymore
                                         connected = false;
@@ -286,7 +293,33 @@ class Room extends JPanel {
                                         newY = Math.floorDiv(getY() + e.getY() - Y, gridSize) * gridSize;
                                     }
                                     break;
-                                case "tb":
+                                case "r":
+                                    if (e.getX() - connectionX > 20 || e.getX() - connectionX < -20) {
+                                        // not connected anymore
+                                        connected = false;
+                                        // regular coords mechanism
+                                        // find new x coord wrt grid size
+                                        NewX = Math.floorDiv(getX() + e.getX() - X, gridSize) * gridSize;
+                                        // find new y coord wrt grid size
+                                        newY = Math.floorDiv(getY() + e.getY() - Y, gridSize) * gridSize;
+                                    } else {
+                                        newY = Math.floorDiv(getY() + e.getY() - Y, gridSize) * gridSize;
+                                    }
+                                    break;
+                                case "t":
+                                    if (e.getY() - connectionY > 20 || e.getY() - connectionY < -20) {
+                                        // not connected anymore
+                                        connected = false;
+                                        // regular coords mechanism
+                                        // find new x coord wrt grid size
+                                        NewX = Math.floorDiv(getX() + e.getX() - X, gridSize) * gridSize;
+                                        // find new y coord wrt grid size
+                                        newY = Math.floorDiv(getY() + e.getY() - Y, gridSize) * gridSize;
+                                    } else {
+                                        NewX = Math.floorDiv(getX() + e.getX() - X, gridSize) * gridSize;
+                                    }
+                                    break;
+                                case "b":
                                     if (e.getY() - connectionY > 20 || e.getY() - connectionY < -20) {
                                         // not connected anymore
                                         connected = false;
@@ -414,16 +447,22 @@ class Room extends JPanel {
 
     public String areconnected(Room room){
                     // bottom                               // top
-                if(room.getY()+room.getHeight()==getY() || getY()+getHeight()==room.getY()){
+                if(room.getY()+room.getHeight()==getY() ){
                     //System.out.println("tb match;");
-                    return "tb";
+                    return "b";
 
                 }
-                        // left                            // right
-                else if(room.getX()==getX()+getWidth() || getX()==room.getX()+room.getWidth()) {
-                    //System.out.println("s match;"+getY());
-                    return "s";
+                if(getY()+getHeight()==room.getY()){
+                    return "t";
                 }
+                        // left                            // right
+                 if(room.getX()==getX()+getWidth()) {
+                    //System.out.println("s match;"+getY());
+                    return "l";
+                }
+                 if(getX()==room.getX()+room.getWidth()){
+                     return "r";
+                 }
 
         return null;
     }

@@ -11,7 +11,7 @@ class MainFrame extends JFrame {
         setVisible(true);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         // creating canvas object
-        canvasClass = new Canvas(this);
+        canvasClass = new Canvas();
         // Buttons
         JButton RedRoom = new JButton("Add Red Element");
         add(RedRoom);
@@ -35,10 +35,11 @@ class MainFrame extends JFrame {
 
         });
 
+
+
         pack();
     }
     public static void main(String[] args) {
         new MainFrame();
     }
-
 }
