@@ -24,6 +24,12 @@ class Canvas extends JPanel {
 
     }
 
+    public void set_color(Color x){
+        setBackground(x);
+    }
+    public void setGridsize(int x){
+        gridsize=x;
+    }
 
     public void addRoom(java.awt.Color x) {
         Room room = new Room(x, this,gridsize,borderwidth);

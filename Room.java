@@ -3,7 +3,7 @@ import java.awt.*;
 import java.awt.event.*;
 
 
-class Room extends JPanel {
+public class Room extends JPanel {
     Canvas canvas;
     Canvas furniture_canvas;
     HotCorner lt;
@@ -107,7 +107,9 @@ class Room extends JPanel {
         setBackground(x);
         setVisible(true);
         furniture_canvas = new Canvas();
-        furniture_canvas.setBackground(x);
+        furniture_canvas.set_color(x);
+        furniture_canvas.setGridsize(5);
+
 
         // borders
 
@@ -176,7 +178,10 @@ class Room extends JPanel {
 
         popup.add(resize);
         resize.addActionListener(e -> {
-
+            setComponentZOrder(lt, 0);
+            setComponentZOrder(rb,0);
+            repaint();
+            revalidate();
         });
 
         // initialising the orientation popup will be done once side option is selected
@@ -192,6 +197,10 @@ class Room extends JPanel {
         rb.setBounds(getWidth() - 10 - borderwidth, getHeight() - 10 - borderwidth, 10, 10);
         add(rb);
 
+        add(furniture_canvas);
+        setComponentZOrder(furniture_canvas,0);
+        setComponentZOrder(lt,1);
+        setComponentZOrder(rb,1);
 
         // Mouse adapter functionality
         // pressed
@@ -215,6 +224,8 @@ class Room extends JPanel {
                 initialX = getX(); // for overlap check
                 initialY = getY(); // for overlap check
                 //System.out.println("mouse pressed on"+e.getComponent());
+                //canvas.update_context_manager((Room)e.getComponent());
+                System.out.println(e.getComponent().getBackground());
             }
 
             public void mouseDragged(MouseEvent e) {
@@ -352,6 +363,7 @@ class Room extends JPanel {
 
 
                 setLocation(NewX, newY);
+               //canvas.update_context_manager((Room)e.getComponent());
                 //int moveX = NewX - getX();
                 //int moveY = newY-getY();
 
@@ -366,7 +378,9 @@ class Room extends JPanel {
                     System.out.println("room overlap");
                     setLocation(initialX, initialY);
                     Canvas.showDialog(canvas.frame,"ROOM OVERLAP!");
+                    //canvas.update_context_manager((Room)e.getComponent());
                 } else {
+                    //canvas.update_context_manager((Room)e.getComponent());
                     System.out.println("room not overlap");
                 }
             }
@@ -395,6 +409,7 @@ class Room extends JPanel {
             setBounds(getX(),getY(),getHeight(),getWidth());
             rb.setLocation(getWidth() - 10 - borderwidth, getHeight() - 10 - borderwidth);
         }
+        //canvas.update_context_manager(this);
 
 
     }
@@ -530,8 +545,7 @@ class Room extends JPanel {
         return lower-upper> 0;
 
     }
-
-
+    // snap to nearby panels
     public int snap(int center, int lt, int rb){
         if (center-lt>rb-center && rb-center<=20){
 
@@ -544,7 +558,6 @@ class Room extends JPanel {
         return -1;
 
     }
-
     // check for nearby panels
     static class Nearby {
         String side;
@@ -647,6 +660,7 @@ class HotCorner extends JPanel {
                 // bringing the room in question up so it's easier to work with
                 // TODO: DELETE THIS LATER
                 owner.setComponentZOrder(e.getComponent(), 0);
+                //owner.canvas.update_context_manager(owner);
 
 
             }
@@ -700,6 +714,9 @@ class HotCorner extends JPanel {
                     owner.rb.setLocation(owner.getWidth() - 10 - borderwidth, owner.getHeight() - 10 - borderwidth);
                     Canvas.showDialog(owner.canvas.frame,"ROOM OVERLAP!");
                 }
+
+                owner.setComponentZOrder(owner.furniture_canvas, 0);
+                //owner.canvas.update_context_manager(owner);
             }
         };
         addMouseListener(hotcornermouse);
