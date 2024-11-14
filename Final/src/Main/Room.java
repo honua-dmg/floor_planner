@@ -1,5 +1,6 @@
 package Main;
 
+import openings.RoomWindow;
 
 import javax.swing.*;
 import java.awt.*;
@@ -11,7 +12,7 @@ import java.util.ArrayList;
 public class Room extends JPanel {
 
     ArrayList<JPanel> doors = new ArrayList<JPanel>();
-    ArrayList<Window> windows = new ArrayList<Window>();
+    ArrayList<RoomWindow> windows = new ArrayList<RoomWindow>();
     ArrayList<Room> furnitures = new ArrayList<Room>();
     Canvas canvas;
     Canvas furniture_canvas;
@@ -48,6 +49,16 @@ public class Room extends JPanel {
     JMenuItem allign_bottom = new JMenuItem("Bottom");
     JMenuItem allign_left = new JMenuItem("Left");
     JMenuItem allign_right = new JMenuItem("Right");
+
+    // doors
+
+    JPopupMenu opening_popup = new JPopupMenu();
+    JMenuItem opening_type =  new JMenuItem("Type");
+
+    JMenuItem top_door = new JMenuItem("Top");
+    JMenuItem bottom_door = new JMenuItem("Bottom");
+    JMenuItem left_door = new JMenuItem("Left");
+    JMenuItem right_door = new JMenuItem("Right");
 
     public void orientation_options(String side){
         switch(side){
@@ -192,13 +203,33 @@ public class Room extends JPanel {
         // door and windows popups
         popup.add(door);
         popup.add(window);
-
-        /*
-        window.addActionListener(e -> {
-            this.addMouseListener(door_window_mouse);
-            this.addMouseMotionListener(door_window_mouse);
+        door.addActionListener(e -> {
+            opening_type.setText("Door");
+            opening_type.setEnabled(false);
+            opening_popup.add(opening_type);
+            opening_popup.add(left_door);
+            opening_popup.add(right_door);
+            opening_popup.add(top_door);
+            opening_popup.add(bottom_door);
+            opening_popup.show(canvas, this.getX(), this.getY());
         });
-        */
+        window.addActionListener(e -> {
+            opening_type.setText("Window");
+            opening_type.setEnabled(false);
+            opening_popup.add(opening_type);
+            opening_popup.add(left_door);
+            opening_popup.add(right_door);
+            opening_popup.add(top_door);
+            opening_popup.add(bottom_door);
+            opening_popup.show(canvas, this.getX(), this.getY());
+        });
+        left_door.addActionListener(e -> {
+
+        });
+
+
+
+
         // making the horcorners visible incase a furniture piece is blocking them.
         popup.add(resize);
         resize.addActionListener(e -> {
@@ -425,10 +456,12 @@ public class Room extends JPanel {
     // rotate room - toDO incomplete
     public void rotate() {
         setBounds(getX(), getY(), getHeight(), getWidth());
+        furniture_canvas.setSize(getWidth()-borderwidth*2, getHeight()-borderwidth*2);
         rb.setLocation(getWidth() - 10 - borderwidth, getHeight() - 10 - borderwidth);
         if(room_overlap()){
             canvas.showDialog(canvas.frame,"ROOM OVERLAP!");
             setBounds(getX(),getY(),getHeight(),getWidth());
+            furniture_canvas.setSize(getWidth()-borderwidth*2, getHeight()-borderwidth*2);
             rb.setLocation(getWidth() - 10 - borderwidth, getHeight() - 10 - borderwidth);
         }
         //canvas.update_context_manager(this);
@@ -775,16 +808,16 @@ class opening_MouseAdapter extends MouseAdapter {
         else {
             switch (side) {
                 case "l":
-                    panel = new Window("vertical",room.color,false);
+                    panel = new RoomWindow("vertical",room.color,false);
                     break;
                 case "r":
-                    panel = new Window("vertical",room.color,true);
+                    panel = new RoomWindow("vertical",room.color,true);
                     break;
                 case "t":
-                    panel = new Window("horizontal",room.color,false);
+                    panel = new RoomWindow("horizontal",room.color,false);
                     break;
                 case "b":
-                    panel = new Window("horizontal",room.color,true);
+                    panel = new RoomWindow("horizontal",room.color,true);
             }
 
         }
@@ -865,85 +898,17 @@ class opening_MouseAdapter extends MouseAdapter {
     }
     public void mouseReleased(MouseEvent e) {
         if(type.equals("Window")){
+            room.windows.add((RoomWindow)panel);
 
+        }else{
+            room.doors.add(panel);
         }
+        room.removeMouseListener(this);
+        room.removeMouseMotionListener(this);
+        room.opening_popup.removeAll();
     }
     //door
 
-    public class Window extends JPanel {
-        Color room_color;
-        String horizontal_or_vertical;
-        Boolean opp;
 
-        public Window(String horizontal_or_vertical, Color color, Boolean opp) {
-            this.room_color = color;
-            this.horizontal_or_vertical = horizontal_or_vertical;
-            this.opp = opp;
-        }
-
-        public void setRoom_color(Color room_color) {
-            this.room_color = room_color;
-        }
-
-        public void toggle_opp() {
-            opp = !opp;
-            repaint();
-        }
-
-        public void toggle_hori_verti() {
-            if (horizontal_or_vertical.equals("horizontal")) {
-                horizontal_or_vertical = "vertical";
-            } else {
-                horizontal_or_vertical = "horizontal";
-            }
-            repaint();
-
-        }
-
-        @Override
-        protected void paintComponent(Graphics g) {
-            super.paintComponent(g); // Always call super to ensure proper painting
-
-            // Cast to Graphics2D for advanced control
-            Graphics2D g2d = (Graphics2D) g;
-
-            // Get the width and height of the panel
-            int width = getWidth();
-            int height = getHeight();
-
-
-            // Define the width of each alternating color band
-            int stripeSize = 5; // Width of each vertical stripe
-
-            // Alternate colors (you can add more colors or patterns as needed)
-            Color[] colors = {Color.BLACK, room_color};
-
-            // Paint alternating vertical stripes
-            if (horizontal_or_vertical.equals("horizontal")) {
-                int y;
-                if (opp) {
-                    y = height - 10;
-                } else {
-                    y = 0;
-                }
-                for (int x = 0; x < width; x += stripeSize) {
-                    g2d.setColor(colors[(x / stripeSize) % 2]); // Alternate colors for each stripe
-                    g2d.fillRect(x, y, stripeSize, 10); // Fill the stripe with the selected color
-                }
-            } else {
-                int x;
-                if (opp) {
-                    x = width - 10;
-                } else {
-                    x = 0;
-                }
-                for (int y = 0; y < height; y += stripeSize) {
-                    g2d.setColor(colors[(y / stripeSize) % 2]); // Alternate colors for each stripe
-                    g2d.fillRect(x, y, 10, stripeSize); // Fill the stripe with the selected color
-                }
-            }
-
-        }
-    }
 }
 

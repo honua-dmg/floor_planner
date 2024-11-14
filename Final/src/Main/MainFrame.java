@@ -31,9 +31,6 @@ public class MainFrame extends JFrame {
 
         pack();
     }
-    public static void main(String[] args) {
-        new MainFrame();
-    }
 }
 
 class Context_manager extends JPanel {
