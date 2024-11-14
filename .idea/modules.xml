@@ -2,9 +2,9 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/Final/Final.iml" filepath="$PROJECT_DIR$/Final/Final.iml" />
       <module fileurl="file://$PROJECT_DIR$/chatgptscripts/chatgptscripts.iml" filepath="$PROJECT_DIR$/chatgptscripts/chatgptscripts.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/oopsv2.iml" filepath="$PROJECT_DIR$/.idea/oopsv2.iml" />
-      <module fileurl="file://$PROJECT_DIR$/opening/opening.iml" filepath="$PROJECT_DIR$/opening/opening.iml" />
       <module fileurl="file://$PROJECT_DIR$/rooms/rooms.iml" filepath="$PROJECT_DIR$/rooms/rooms.iml" />
     </modules>
   </component>
