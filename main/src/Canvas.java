@@ -15,12 +15,12 @@ public class Canvas extends JPanel {
     int standard_room_width = 100;
     int standard_room_height = 50;
     int gridsize=10;
-    int borderwidth=0;
+    int borderwidth=1;
 
     public Canvas() {
         rooms = new ArrayList<>();
         setLayout(null);
-        setSize(600, 500);
+        setSize(1200, 1000);
         setBackground(Color.WHITE);
         setVisible(true);
 
@@ -160,6 +160,7 @@ public class Canvas extends JPanel {
                 g.fillOval(x - 1, y - 1, 2, 2); // Draw a dot (4x4 pixels)
             }
         }
+        setBorder(BorderFactory.createLineBorder(Color.BLACK,borderwidth));
     }
 
 

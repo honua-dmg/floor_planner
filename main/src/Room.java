@@ -3,17 +3,26 @@ package main.src;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.lang.reflect.Array;
+import java.util.ArrayList;
 
 
 public class Room extends JPanel {
+
+    ArrayList<JPanel> doors = new ArrayList<JPanel>();
+    ArrayList<Window> windows = new ArrayList<Window>();
+    ArrayList<Room> furnitures = new ArrayList<Room>();
     Canvas canvas;
     Canvas furniture_canvas;
+
     HotCorner lt;
     HotCorner rb;
+
     int borderwidth;
     int gridSize;
-    int [] new_room_coords;
-    //int gridSize;
+
+
+    Color color;
     // popup menu
     JPopupMenu popup = new JPopupMenu();
     JMenuItem rotate = new JMenuItem("Rotate");
@@ -21,6 +30,8 @@ public class Room extends JPanel {
     JMenuItem add_room = new JMenuItem("Add Room");
     JMenuItem resize = new JMenuItem("Resize");
     JMenuItem furniture = new JMenuItem("Furniture");
+    JMenuItem door  = new JMenuItem("Door");
+    JMenuItem window = new JMenuItem("Window");
     // once add_room is decided, we need to decide which side the room will be added to
     JPopupMenu side_popup = new JPopupMenu();
     JMenuItem left = new JMenuItem("Left");
@@ -97,25 +108,25 @@ public class Room extends JPanel {
 
     }
 
-
-    public Room(Color x, Canvas canvass, int gridSize, int borderwidth) {
+    public Room(Color color, Canvas canvass, int gridSize, int borderwidth) {
         canvas = canvass;
         this.gridSize = gridSize;
         this.borderwidth = borderwidth;
+        this.color = color;
         //Basic setup
         setLayout(null);
         setSize(100, 50);
         setPreferredSize(new Dimension(100, 50));
-        setBackground(x);
+        setBackground(color);
         setVisible(true);
         furniture_canvas = new Canvas();
-        furniture_canvas.set_color(x);
+        furniture_canvas.set_color(color);
         furniture_canvas.setGridsize(5);
-
-
+        furniture_canvas.setLocation(borderwidth, borderwidth);
+        furniture_canvas.setSize(getWidth()-borderwidth*2, getHeight()-borderwidth*2);
         // borders
-
-        this.setBorder(BorderFactory.createLineBorder(Color.BLACK, 2, true));
+        this.setBorder(BorderFactory.createLineBorder(Color.BLACK, borderwidth));
+        //furniture_canvas.setBorder(BorderFactory.createLineBorder(Color.BLACK, borderwidth));
 
         // initialising side popup
         side_popup.add(left);
@@ -129,20 +140,20 @@ public class Room extends JPanel {
         rotate.addActionListener(e -> {
             this.rotate();
         });
+
         // delete option
         popup.add(delete);
-
         delete.addActionListener(e -> {
             canvas.remove(this);
             canvas.revalidate();
             canvas.repaint();
         });
-        popup.add(add_room);
 
+        // add room segment
+        popup.add(add_room);
         add_room.addActionListener( e ->{
             side_popup.show(canvas, this.getX(), this.getY());
         });
-
         left.addActionListener(e -> {
             orientation_options("Left");
         });
@@ -155,11 +166,9 @@ public class Room extends JPanel {
         bottom.addActionListener(e -> {
             orientation_options("Bottom");
         });
-
         allign_centerX.addActionListener(e -> {
             alignment("centerX");
         });
-
         allign_centerY.addActionListener(e -> {
             alignment("centerY");
         });
@@ -175,9 +184,21 @@ public class Room extends JPanel {
         allign_bottom.addActionListener(e -> {
             alignment("bottom");
         });
+
         // furniture pane TODO
         popup.add(furniture);
 
+        // door and windows popups
+        popup.add(door);
+        popup.add(window);
+
+        /*
+        window.addActionListener(e -> {
+            this.addMouseListener(door_window_mouse);
+            this.addMouseMotionListener(door_window_mouse);
+        });
+        */
+        // making the horcorners visible incase a furniture piece is blocking them.
         popup.add(resize);
         resize.addActionListener(e -> {
             setComponentZOrder(lt, 0);
@@ -186,26 +207,24 @@ public class Room extends JPanel {
             revalidate();
         });
 
-        // initialising the orientation popup will be done once side option is selected
 
 
 
-        // hotcorners
-        //  lt
-        lt = new HotCorner(this, "lt", x,gridSize,borderwidth);
+
+        //  initialising hotcorners
+        lt = new HotCorner(this, "lt", color,gridSize,borderwidth);
         lt.setBounds(borderwidth, borderwidth, 10, 10);
         add(lt);
-        rb = new HotCorner(this, "rb", x,gridSize,borderwidth);
+        rb = new HotCorner(this, "rb", color,gridSize,borderwidth);
         rb.setBounds(getWidth() - 10 - borderwidth, getHeight() - 10 - borderwidth, 10, 10);
         add(rb);
-
+        // adding furniture canvas
         add(furniture_canvas);
         setComponentZOrder(furniture_canvas,0);
         setComponentZOrder(lt,1);
         setComponentZOrder(rb,1);
 
-        // Mouse adapter functionality
-        // pressed
+        // Mouse adapter functionality - to move the room around
         MouseAdapter mouse = new MouseAdapter() {
 
             boolean connected = false;
@@ -415,7 +434,6 @@ public class Room extends JPanel {
 
 
     }
-
     // room overlap checker
     public  boolean room_overlap() {
         int lt_roomX = getX();
@@ -444,10 +462,8 @@ public class Room extends JPanel {
 
         return overlap;
     }
-
     // generic overlap
-    public boolean overlap(int ltx1, int lty1, int rbx1, int rby1,
-                           int ltx2, int lty2, int rbx2, int rby2) {
+    public boolean overlap(int ltx1, int lty1, int rbx1, int rby1, int ltx2, int lty2, int rbx2, int rby2) {
         /*
         boolean overlap = false;
         if (ltx1 < rbx2 && rbx1 > ltx2) {
@@ -461,8 +477,9 @@ public class Room extends JPanel {
          */
         return (ltx1 < rbx2 && rbx1 > ltx2 && lty1 < rby2 && rby1 > lty2);
     }
-
+    // check if the rooms are connected
     public String areconnected(Room room){
+
         // bottom                               // top
         if(room.getY()+room.getHeight()==getY() ){
             //System.out.println("tb match;");
@@ -538,7 +555,7 @@ public class Room extends JPanel {
 
 
     }
-
+    // get the intersection of the sides
     public boolean intersection(int lt1,int lt2, int rb1, int rb2){
         // here the variables are called lt1, rb1 not to indicate said points, but to reference that
         // variable should contain the coords of the leftmost OR the topmost coordinate of the rect
@@ -576,11 +593,13 @@ public class Room extends JPanel {
 class HotCorner extends JPanel {
     int gridSize;
     int borderwidth;
+    Room owner;
 
     public HotCorner(Room owner, String corner, Color x, int gridSize, int borderwidth) {
         setBackground(Color.PINK); // TODO: DELETE THIS LATER
         this.gridSize = gridSize;
         this.borderwidth= borderwidth;
+        this.owner = owner;
         // most of the work is done here:
         MouseAdapter hotcornermouse = new MouseAdapter() {
             final int minsize = 40;
@@ -617,6 +636,7 @@ class HotCorner extends JPanel {
                         if (newWidth > minsize && newHeight > minsize) {
                             // setting new width and height
                             owner.setSize(newWidth, newHeight);
+                            owner.furniture_canvas.setSize(owner.getWidth()-owner.borderwidth*2, owner.getHeight()-owner.borderwidth*2);
                             // changing location of origin
                             owner.setLocation(owner.getX() + e.getX() - X, owner.getY() + e.getY() - Y);
                             // changing location of rb hotcorner so it stays on the rb corner
@@ -628,6 +648,7 @@ class HotCorner extends JPanel {
 
                             owner.setLocation(owner.getX() + e.getX() - X, owner.getY() + (owner.getHeight() - minsize));
                             owner.setSize(newWidth, minsize);
+                            owner.furniture_canvas.setSize(owner.getWidth()-owner.borderwidth*2, owner.getHeight()-owner.borderwidth*2);
 
                             owner.rb.setLocation(owner.getWidth() - 10 - borderwidth, owner.getHeight() - 10 - borderwidth);
 
@@ -636,6 +657,7 @@ class HotCorner extends JPanel {
                             owner.setSize(minsize, newHeight);
 
                             owner.rb.setLocation(owner.getWidth() - 10 - borderwidth, owner.getHeight() - 10 - borderwidth);
+                            owner.furniture_canvas.setSize(owner.getWidth()-owner.borderwidth*2, owner.getHeight()-owner.borderwidth*2);
                         }
 
 
@@ -655,6 +677,7 @@ class HotCorner extends JPanel {
                             owner.setSize(minsize, newHeight);
                         }
                         setLocation(owner.getWidth() - 10 - borderwidth, owner.getHeight() - 10 - borderwidth);
+                        owner.furniture_canvas.setSize(owner.getWidth()-owner.borderwidth*2, owner.getHeight()-owner.borderwidth*2);
                         break;
                 }
 
@@ -695,6 +718,7 @@ class HotCorner extends JPanel {
                         // TODO :OVERLAP CHECK
                         if (newWidth > 20 && newHeight > 20) {
                             owner.setSize(newWidth, newHeight);
+                            owner.furniture_canvas.setSize(owner.getWidth()-owner.borderwidth*2, owner.getHeight()-owner.borderwidth*2);
                             owner.setLocation(newXcoord, newYcoord);
                             // setting rb to the right bottom corner yet again- yes it's pretty annoying,
                             // and yes it's necessary because we have to change the width of the room when we're pulling lt
@@ -706,6 +730,7 @@ class HotCorner extends JPanel {
                         newWidth = Math.floorDiv(owner.getWidth(), gridSize) * gridSize;
                         newHeight = Math.floorDiv(owner.getHeight(), gridSize) * gridSize;
                         owner.setSize(newWidth, newHeight);
+                        owner.furniture_canvas.setSize(owner.getWidth()-owner.borderwidth*2, owner.getHeight()-owner.borderwidth*2);
                         setLocation(owner.getWidth() - 10 - borderwidth, owner.getHeight() - 10 - borderwidth);
                 }
 
@@ -713,6 +738,7 @@ class HotCorner extends JPanel {
                 if(owner.room_overlap()){
                     owner.setLocation(intialx, intialy);
                     owner.setSize(initialwid,initiallen);
+                    owner.furniture_canvas.setSize(owner.getWidth()-owner.borderwidth*2, owner.getHeight()-owner.borderwidth*2);
                     owner.rb.setLocation(owner.getWidth() - 10 - borderwidth, owner.getHeight() - 10 - borderwidth);
                     Canvas.showDialog(owner.canvas.frame,"ROOM OVERLAP!");
                 }
@@ -723,6 +749,200 @@ class HotCorner extends JPanel {
         };
         addMouseListener(hotcornermouse);
         addMouseMotionListener(hotcornermouse);
+    }
+}
+
+class opening_MouseAdapter extends MouseAdapter {
+    Room room;
+    Canvas canvas;
+    int initialX;
+    int initialY;
+    String type;
+    String side;
+    int panel_size = 10;
+    JPanel panel;
+    // decide panel
+    public opening_MouseAdapter(Room room,Canvas canvas,String side,String type) {
+        this.room = room;
+        this.canvas= canvas;
+        this.type = type; // door or window - deal with window later
+        this.side=side;
+        if(type.equals("door")){
+            panel = new JPanel();
+            panel.setBackground(room.color);
+        }
+        else {
+            switch (side) {
+                case "l":
+                    panel = new Window("vertical",room.color,false);
+                    break;
+                case "r":
+                    panel = new Window("vertical",room.color,true);
+                    break;
+                case "t":
+                    panel = new Window("horizontal",room.color,false);
+                    break;
+                case "b":
+                    panel = new Window("horizontal",room.color,true);
+            }
+
+        }
+    }
+    public void mousePressed(MouseEvent e) {
+        int x = e.getX();
+        int y = e.getY();
+        switch (type) {
+            case "t":
+                initialX = Math.floorDiv(x,room.furniture_canvas.gridsize)*room.furniture_canvas.gridsize;
+                initialY =0;
+
+                break;
+            case "b":
+                initialX = Math.floorDiv(x,room.furniture_canvas.gridsize)*room.furniture_canvas.gridsize;
+                initialY =room.getHeight()-panel_size;
+                break;
+
+            case "l":
+                initialY = Math.floorDiv(y,room.furniture_canvas.gridsize)*room.furniture_canvas.gridsize;
+                initialX = 0;
+                break;
+            case "r":
+                initialY = Math.floorDiv(y,room.furniture_canvas.gridsize)*room.furniture_canvas.gridsize;
+                initialX = room.getWidth()-panel_size;
+                break;
+        }
+        panel.setLocation(initialX,initialY);
+    }
+    public void mouseDragged(MouseEvent e) {
+        int x = e.getX();
+        int y = e.getY();
+
+        int length;
+        int height;
+        switch (type) {
+            case "t":
+
+                length = Math.floorDiv(x,room.furniture_canvas.gridsize)*room.furniture_canvas.gridsize-initialX;
+                if(length<0){
+                    initialX = x;
+                    panel.setLocation(initialX,initialY);
+                    length= -length;
+                }
+                panel.setSize(length,panel_size);
+                break;
+
+            case "b":
+                length = Math.floorDiv(x,room.furniture_canvas.gridsize)*room.furniture_canvas.gridsize-initialX;
+                if(length<0){
+                    initialX = x;
+                    panel.setLocation(initialX,initialY);
+                    length= -length;
+                }
+                panel.setSize(length,panel_size);
+                break;
+
+            case "l":
+                height = Math.floorDiv(y,room.furniture_canvas.gridsize)*room.furniture_canvas.gridsize-y;
+                if(height<0){
+                    initialY = y;
+                    panel.setLocation(initialX,initialY);
+                    height= -height;
+                }
+                panel.setSize(panel_size,height);
+                break;
+            case "r":
+                height = Math.floorDiv(y,room.furniture_canvas.gridsize)*room.furniture_canvas.gridsize-y;
+                if(height<0){
+                    initialY = y;
+                    panel.setLocation(initialX,initialY);
+                    height= -height;
+                }
+                panel.setSize(panel_size,height);
+                break;
+        }
+        panel.repaint();
+    }
+    public void mouseReleased(MouseEvent e) {
+        if(type.equals("Window")){
+
+        }
+    }
+    //door
+
+    public class Window extends JPanel {
+        Color room_color;
+        String horizontal_or_vertical;
+        Boolean opp;
+
+        public Window(String horizontal_or_vertical, Color color, Boolean opp) {
+            this.room_color = color;
+            this.horizontal_or_vertical = horizontal_or_vertical;
+            this.opp = opp;
+        }
+
+        public void setRoom_color(Color room_color) {
+            this.room_color = room_color;
+        }
+
+        public void toggle_opp() {
+            opp = !opp;
+            repaint();
+        }
+
+        public void toggle_hori_verti() {
+            if (horizontal_or_vertical.equals("horizontal")) {
+                horizontal_or_vertical = "vertical";
+            } else {
+                horizontal_or_vertical = "horizontal";
+            }
+            repaint();
+
+        }
+
+        @Override
+        protected void paintComponent(Graphics g) {
+            super.paintComponent(g); // Always call super to ensure proper painting
+
+            // Cast to Graphics2D for advanced control
+            Graphics2D g2d = (Graphics2D) g;
+
+            // Get the width and height of the panel
+            int width = getWidth();
+            int height = getHeight();
+
+
+            // Define the width of each alternating color band
+            int stripeSize = 5; // Width of each vertical stripe
+
+            // Alternate colors (you can add more colors or patterns as needed)
+            Color[] colors = {Color.BLACK, room_color};
+
+            // Paint alternating vertical stripes
+            if (horizontal_or_vertical.equals("horizontal")) {
+                int y;
+                if (opp) {
+                    y = height - 10;
+                } else {
+                    y = 0;
+                }
+                for (int x = 0; x < width; x += stripeSize) {
+                    g2d.setColor(colors[(x / stripeSize) % 2]); // Alternate colors for each stripe
+                    g2d.fillRect(x, y, stripeSize, 10); // Fill the stripe with the selected color
+                }
+            } else {
+                int x;
+                if (opp) {
+                    x = width - 10;
+                } else {
+                    x = 0;
+                }
+                for (int y = 0; y < height; y += stripeSize) {
+                    g2d.setColor(colors[(y / stripeSize) % 2]); // Alternate colors for each stripe
+                    g2d.fillRect(x, y, 10, stripeSize); // Fill the stripe with the selected color
+                }
+            }
+
+        }
     }
 }
 
