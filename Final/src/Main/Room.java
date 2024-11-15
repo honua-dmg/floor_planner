@@ -170,7 +170,8 @@ public class Room extends JPanel {
                             case "l":
                                 NewX=nearbyroom.room.getX()+nearbyroom.room.getWidth();
                                 // change this
-                                newY = Math.floorDiv(getY() + e.getY() - Y, gridSize) * gridSize;
+                                //newY = Math.floorDiv(getY() + e.getY() - Y, gridSize) * gridSize;
+                                newY = get_grid_coords(getY()+e.getY()-Y);
                                 //snap = snap((2*getY()+getHeight())/2,nearbyroom.room.getY(),nearbyroom.room.getY()+nearbyroom.room.getHeight());
                                 //if (snap!=-1){
                                 //    newY = snap;}
@@ -181,7 +182,8 @@ public class Room extends JPanel {
                             case "t":
                                 newY = nearbyroom.room.getY()+nearbyroom.room.getHeight();
                                 // change this
-                                NewX = Math.floorDiv(getX() + e.getX() - X, gridSize) * gridSize;
+                                //NewX = Math.floorDiv(getX() + e.getX() - X, gridSize) * gridSize;
+                                NewX = get_grid_coords(getX()+e.getX()-X);
                                 //snap = snap((2*getX()+getWidth())/2,nearbyroom.room.getX(),nearbyroom.room.getX()+nearbyroom.room.getWidth());
                                 //if (snap!=-1){
                                 //    NewX = snap;}
@@ -191,7 +193,8 @@ public class Room extends JPanel {
                             case "r":
                                 NewX = nearbyroom.room.getX()-getWidth();
                                 // change this
-                                newY = Math.floorDiv(getY() + e.getY() - Y, gridSize) * gridSize;
+                                //newY = Math.floorDiv(getY() + e.getY() - Y, gridSize) * gridSize;
+                                newY = get_grid_coords(getY()+e.getY()-Y);
                                 //snap = snap((2*getY()+getHeight())/2,nearbyroom.room.getY(),nearbyroom.room.getY()+nearbyroom.room.getHeight());
                                 //if (snap!=-1){
                                 //    newY = snap;}
@@ -201,7 +204,8 @@ public class Room extends JPanel {
                             case "b":
                                 newY = nearbyroom.room.getY()-getHeight();
                                 // change this
-                                NewX = Math.floorDiv(getX() + e.getX() - X, gridSize) * gridSize;
+                                //NewX = Math.floorDiv(getX() + e.getX() - X, gridSize) * gridSize;
+                                NewX = get_grid_coords(getX()+e.getX()-X);
                                 //snap = snap((2*getX()+getWidth())/2,nearbyroom.room.getX(),nearbyroom.room.getX()+nearbyroom.room.getWidth());
                                 //if (snap!=-1){
                                 //    NewX = snap;}
@@ -337,6 +341,7 @@ public class Room extends JPanel {
         setVisible(true);
 
         furniture_canvas = new Canvas();
+        furniture_canvas.furniture_canvas=true;
         furniture_canvas.set_color(color);
         furniture_canvas.setGridsize(10);
         furniture_canvas.setLocation(borderwidth, borderwidth);
@@ -660,6 +665,15 @@ public class Room extends JPanel {
             this.side = side;
             this.room = room;
         }
+    }
+
+    public int get_grid_coords(int x){
+        int newX = Math.floorDiv(x,gridSize)*gridSize;
+
+        if(canvas.furniture_canvas){
+            newX-=borderwidth;
+        }
+        return  newX;
     }
 
 }

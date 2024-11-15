@@ -9,7 +9,7 @@ import java.util.ArrayList;
 
 public class Canvas extends JPanel {
     int[] room_coords = {-1, -1}; // this is used incase we need to add a room wrt another room
-    boolean show_grid = true;
+    boolean furniture_canvas = false;
     boolean wrt_room = false;
     ArrayList<Room> rooms;
     JFrame frame;
@@ -156,13 +156,20 @@ public class Canvas extends JPanel {
         g.setColor(new Color(90,90,90));
 
         // Draw the dot grid
-        if(show_grid){
-            for (int x = 0; x < getWidth(); x += gridsize*2) {
-                for (int y = 0; y < getHeight(); y += gridsize*2) {
-                    g.fillOval(x - 1, y - 1, 2, 2); // Draw a dot (4x4 pixels)
-                }
+        int x;
+        int spacing;
+        if(furniture_canvas){
+            x = -borderwidth;
+        }else{
+            x = 0;
+        }
+
+        for (;x < getWidth(); x += gridsize*2) {
+            for (int y = 0; y < getHeight(); y += gridsize*2) {
+                g.fillOval(x - 1, y - 1, 2, 2); // Draw a dot (4x4 pixels)
             }
         }
+
 
         //setBorder(BorderFactory.createLineBorder(Color.BLACK,borderwidth));
     }
