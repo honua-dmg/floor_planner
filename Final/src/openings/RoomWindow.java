@@ -3,7 +3,7 @@ package openings;
 import javax.swing.*;
 import java.awt.*;
 
-public class RoomWindow extends JPanel {
+public class RoomWindow extends Opening {
     Color room_color;
     String horizontal_or_vertical;
     Boolean opp;

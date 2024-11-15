@@ -1,6 +1,6 @@
 package Main;
 
-import openings.RoomWindow;
+import openings.*;
 
 import javax.swing.*;
 import java.awt.*;
@@ -11,11 +11,13 @@ import java.util.ArrayList;
 
 public class Room extends JPanel {
 
-    ArrayList<JPanel> doors = new ArrayList<JPanel>();
-    ArrayList<RoomWindow> windows = new ArrayList<RoomWindow>();
+    ArrayList<Opening> openings = new ArrayList<>();
+
     ArrayList<Room> furnitures = new ArrayList<Room>();
     Canvas canvas;
     Canvas furniture_canvas;
+
+    MouseAdapter mouse;
 
     HotCorner lt;
     HotCorner rb;
@@ -59,6 +61,9 @@ public class Room extends JPanel {
     JMenuItem bottom_door = new JMenuItem("Bottom");
     JMenuItem left_door = new JMenuItem("Left");
     JMenuItem right_door = new JMenuItem("Right");
+
+    //removing options
+
 
     public void orientation_options(String side){
         switch(side){
@@ -114,7 +119,7 @@ public class Room extends JPanel {
                 break;
 
         }
-        System.out.println("X,Y:"+getX()+","+getY()+" NewX,NewY:"+canvas.room_coords[0]+","+canvas.room_coords[1]);
+        //System.out.println("X,Y:"+getX()+","+getY()+" NewX,NewY:"+canvas.room_coords[0]+","+canvas.room_coords[1]);
         canvas.wrt_room = true;
         orientation_popup.removeAll();
 
@@ -125,139 +130,10 @@ public class Room extends JPanel {
         this.gridSize = gridSize;
         this.borderwidth = borderwidth;
         this.color = color;
-        //Basic setup
-        setLayout(null);
-        setSize(100, 50);
-        setPreferredSize(new Dimension(100, 50));
-        setBackground(color);
-        setVisible(true);
-        furniture_canvas = new Canvas();
-        furniture_canvas.set_color(color);
-        furniture_canvas.setGridsize(5);
-        furniture_canvas.setLocation(borderwidth, borderwidth);
-        furniture_canvas.setSize(getWidth()-borderwidth*2, getHeight()-borderwidth*2);
-        // borders
-        this.setBorder(BorderFactory.createLineBorder(Color.BLACK, borderwidth));
-        //furniture_canvas.setBorder(BorderFactory.createLineBorder(Color.BLACK, borderwidth));
 
-        // initialising side popup
-        side_popup.add(left);
-        side_popup.add(right);
-        side_popup.add(top);
-        side_popup.add(bottom);
-
-        // initialising rightclick popup:
-        // rotate option
-        popup.add(rotate);
-        rotate.addActionListener(e -> {
-            this.rotate();
-        });
-
-        // delete option
-        popup.add(delete);
-        delete.addActionListener(e -> {
-            canvas.remove(this);
-            canvas.revalidate();
-            canvas.repaint();
-        });
-
-        // add room segment
-        popup.add(add_room);
-        add_room.addActionListener( e ->{
-            side_popup.show(canvas, this.getX(), this.getY());
-        });
-        left.addActionListener(e -> {
-            orientation_options("Left");
-        });
-        right.addActionListener(e -> {
-            orientation_options("Right");
-        });
-        top.addActionListener(e -> {
-            orientation_options("Top");
-        });
-        bottom.addActionListener(e -> {
-            orientation_options("Bottom");
-        });
-        allign_centerX.addActionListener(e -> {
-            alignment("centerX");
-        });
-        allign_centerY.addActionListener(e -> {
-            alignment("centerY");
-        });
-        allign_left.addActionListener(e -> {
-            alignment("left");
-        });
-        allign_right.addActionListener(e -> {
-            alignment("right");
-        });
-        allign_top.addActionListener(e -> {
-            alignment("top");
-        });
-        allign_bottom.addActionListener(e -> {
-            alignment("bottom");
-        });
-
-        // furniture pane TODO
-        popup.add(furniture);
-
-        // door and windows popups
-        popup.add(door);
-        popup.add(window);
-        door.addActionListener(e -> {
-            opening_type.setText("Door");
-            opening_type.setEnabled(false);
-            opening_popup.add(opening_type);
-            opening_popup.add(left_door);
-            opening_popup.add(right_door);
-            opening_popup.add(top_door);
-            opening_popup.add(bottom_door);
-            opening_popup.show(canvas, this.getX(), this.getY());
-        });
-        window.addActionListener(e -> {
-            opening_type.setText("Window");
-            opening_type.setEnabled(false);
-            opening_popup.add(opening_type);
-            opening_popup.add(left_door);
-            opening_popup.add(right_door);
-            opening_popup.add(top_door);
-            opening_popup.add(bottom_door);
-            opening_popup.show(canvas, this.getX(), this.getY());
-        });
-        left_door.addActionListener(e -> {
-
-        });
-
-
-
-
-        // making the horcorners visible incase a furniture piece is blocking them.
-        popup.add(resize);
-        resize.addActionListener(e -> {
-            setComponentZOrder(lt, 0);
-            setComponentZOrder(rb,0);
-            repaint();
-            revalidate();
-        });
-
-
-
-
-
-        //  initialising hotcorners
-        lt = new HotCorner(this, "lt", color,gridSize,borderwidth);
-        lt.setBounds(borderwidth, borderwidth, 10, 10);
-        add(lt);
-        rb = new HotCorner(this, "rb", color,gridSize,borderwidth);
-        rb.setBounds(getWidth() - 10 - borderwidth, getHeight() - 10 - borderwidth, 10, 10);
-        add(rb);
-        // adding furniture canvas
-        add(furniture_canvas);
-        setComponentZOrder(furniture_canvas,0);
-        setComponentZOrder(lt,1);
-        setComponentZOrder(rb,1);
 
         // Mouse adapter functionality - to move the room around
-        MouseAdapter mouse = new MouseAdapter() {
+        mouse = new MouseAdapter() {
 
             boolean connected = false;
             int X;
@@ -278,7 +154,7 @@ public class Room extends JPanel {
                 initialY = getY(); // for overlap check
                 //System.out.println("mouse pressed on"+e.getComponent());
                 //canvas.update_context_manager((Room)e.getComponent());
-                System.out.println(e.getComponent().getBackground());
+                //System.out.println(e.getComponent().getBackground());
             }
 
             public void mouseDragged(MouseEvent e) {
@@ -428,7 +304,7 @@ public class Room extends JPanel {
             // overlap check goes here
             public void mouseReleased(MouseEvent e) {
                 if (room_overlap()) {
-                    System.out.println("room overlap");
+                    //System.out.println("room overlap");
                     setLocation(initialX, initialY);
                     Canvas.showDialog(canvas.frame,"ROOM OVERLAP!");
                     //canvas.update_context_manager((Room)e.getComponent());
@@ -452,6 +328,170 @@ public class Room extends JPanel {
         };
         addMouseListener(mouse); // to register clicks
         addMouseMotionListener(mouse); // to register drag
+
+        //Basic setup
+        setLayout(null);
+        setSize(100, 50);
+        setPreferredSize(new Dimension(100, 50));
+        setBackground(color);
+        setVisible(true);
+
+        furniture_canvas = new Canvas();
+        furniture_canvas.set_color(color);
+        furniture_canvas.setGridsize(10);
+        furniture_canvas.setLocation(borderwidth, borderwidth);
+        furniture_canvas.setSize(getWidth()-borderwidth*2, getHeight()-borderwidth*2);
+        furniture_canvas.setVisible(true);
+
+        // borders
+        this.setBorder(BorderFactory.createLineBorder(Color.BLACK, borderwidth));
+        furniture_canvas.setBorder(BorderFactory.createLineBorder(color, 0));
+
+        // initialising side popup
+        side_popup.add(left);
+        side_popup.add(right);
+        side_popup.add(top);
+        side_popup.add(bottom);
+
+        // initialising rightclick popup:
+        // rotate option
+        popup.add(rotate);
+        rotate.addActionListener(e -> {
+            this.rotate();
+        });
+
+        // delete option
+        popup.add(delete);
+        delete.addActionListener(e -> {
+            canvas.remove(this);
+            canvas.rooms.remove(this);
+            canvas.revalidate();
+            canvas.repaint();
+        });
+
+        // add room segment
+        popup.add(add_room);
+        add_room.addActionListener( e ->{
+            side_popup.show(canvas, this.getX(), this.getY());
+        });
+        left.addActionListener(e -> {
+            orientation_options("Left");
+        });
+        right.addActionListener(e -> {
+            orientation_options("Right");
+        });
+        top.addActionListener(e -> {
+            orientation_options("Top");
+        });
+        bottom.addActionListener(e -> {
+            orientation_options("Bottom");
+        });
+        allign_centerX.addActionListener(e -> {
+            alignment("centerX");
+        });
+        allign_centerY.addActionListener(e -> {
+            alignment("centerY");
+        });
+        allign_left.addActionListener(e -> {
+            alignment("left");
+        });
+        allign_right.addActionListener(e -> {
+            alignment("right");
+        });
+        allign_top.addActionListener(e -> {
+            alignment("top");
+        });
+        allign_bottom.addActionListener(e -> {
+            alignment("bottom");
+        });
+
+        // furniture pane TODO
+        popup.add(furniture);
+
+        // door and windows popups
+        popup.add(door);
+        popup.add(window);
+        door.addActionListener(e -> {
+            opening_type.setText("door");
+            opening_type.setEnabled(false);
+            opening_popup.add(opening_type);
+            opening_popup.add(left_door);
+            opening_popup.add(right_door);
+            opening_popup.add(top_door);
+            opening_popup.add(bottom_door);
+            opening_popup.show(canvas, this.getX(), this.getY());
+        });
+        window.addActionListener(e -> {
+            opening_type.setText("window");
+            opening_type.setEnabled(false);
+            opening_popup.add(opening_type);
+            opening_popup.add(left_door);
+            opening_popup.add(right_door);
+            opening_popup.add(top_door);
+            opening_popup.add(bottom_door);
+            opening_popup.show(canvas, this.getX(), this.getY());
+        });
+        left_door.addActionListener(e -> {
+            opening_MouseAdapter adapter = new opening_MouseAdapter(this,canvas,"l",opening_type.getText());
+            removeMouseListener(mouse);
+            removeMouseMotionListener(mouse);
+            addMouseListener(adapter);
+            addMouseMotionListener(adapter);
+        });
+        right_door.addActionListener(e -> {
+            opening_MouseAdapter adapter = new opening_MouseAdapter(this,canvas,"r",opening_type.getText());
+            removeMouseListener(mouse);
+            removeMouseMotionListener(mouse);
+            addMouseListener(adapter);
+            addMouseMotionListener(adapter);
+        });
+        top_door.addActionListener(e -> {
+            opening_MouseAdapter adapter = new opening_MouseAdapter(this,canvas,"t",opening_type.getText());
+            removeMouseListener(mouse);
+            removeMouseMotionListener(mouse);
+            addMouseListener(adapter);
+            addMouseMotionListener(adapter);
+        });
+        bottom_door.addActionListener(e -> {
+            opening_MouseAdapter adapter = new opening_MouseAdapter(this,canvas,"b",opening_type.getText());
+            removeMouseListener(mouse);
+            removeMouseMotionListener(mouse);
+            addMouseListener(adapter);
+            addMouseMotionListener(adapter);
+        });
+
+
+
+
+
+        // making the horcorners visible incase a furniture piece is blocking them.
+        popup.add(resize);
+        resize.addActionListener(e -> {
+            setComponentZOrder(lt, 0);
+            setComponentZOrder(rb,0);
+            repaint();
+            revalidate();
+        });
+
+
+
+
+
+        //  initialising hotcorners
+        lt = new HotCorner(this, "lt", color,gridSize,borderwidth);
+        lt.setBounds(borderwidth, borderwidth, 10, 10);
+        add(lt);
+        rb = new HotCorner(this, "rb", color,gridSize,borderwidth);
+        rb.setBounds(getWidth() - 10 - borderwidth, getHeight() - 10 - borderwidth, 10, 10);
+        add(rb);
+        // adding furniture canvas
+        add(furniture_canvas);
+
+        setComponentZOrder(furniture_canvas,0);
+        setComponentZOrder(lt,1);
+        setComponentZOrder(rb,1);
+
+
     }
     // rotate room - toDO incomplete
     public void rotate() {
@@ -489,8 +529,8 @@ public class Room extends JPanel {
             if (overlap(lt_otherX, lt_otherY, rb_otherX, rb_otherY,
                     lt_roomX, lt_roomY, rb_roomX, rb_roomY)) {
                 overlap = true;
-                System.out.println(getX()+","+getY()+":"+(getX()+getWidth())+","+(getY()+getHeight()));
-                System.out.println(room.getX()+","+room.getY()+":"+(room.getX()+room.getWidth())+","+(room.getY()+room.getHeight()));
+                //(getX()+","+getY()+":"+(getX()+getWidth())+","+(getY()+getHeight()));
+                //System.out.println(room.getX()+","+room.getY()+":"+(room.getX()+room.getWidth())+","+(room.getY()+room.getHeight()));
             }
         }
 
@@ -794,7 +834,7 @@ class opening_MouseAdapter extends MouseAdapter {
     String type;
     String side;
     int panel_size = 10;
-    JPanel panel;
+    Opening panel;
     // decide panel
     public opening_MouseAdapter(Room room,Canvas canvas,String side,String type) {
         this.room = room;
@@ -802,7 +842,8 @@ class opening_MouseAdapter extends MouseAdapter {
         this.type = type; // door or window - deal with window later
         this.side=side;
         if(type.equals("door")){
-            panel = new JPanel();
+            panel = new Opening();
+            //panel.setBackground(Color.WHITE);
             panel.setBackground(room.color);
         }
         else {
@@ -821,31 +862,45 @@ class opening_MouseAdapter extends MouseAdapter {
             }
 
         }
+        room.add(panel);
+        System.out.println("Door added!");
     }
     public void mousePressed(MouseEvent e) {
         int x = e.getX();
         int y = e.getY();
-        switch (type) {
+        System.out.println(x+","+y);
+        switch (side) {
             case "t":
+                System.out.println("TOP selected");
                 initialX = Math.floorDiv(x,room.furniture_canvas.gridsize)*room.furniture_canvas.gridsize;
                 initialY =0;
+                panel.setLocation(initialX,initialY);
+
 
                 break;
             case "b":
+                System.out.println("B selected");
                 initialX = Math.floorDiv(x,room.furniture_canvas.gridsize)*room.furniture_canvas.gridsize;
                 initialY =room.getHeight()-panel_size;
+                panel.setLocation(initialX,initialY);
                 break;
 
             case "l":
+                System.out.println("L selected");
                 initialY = Math.floorDiv(y,room.furniture_canvas.gridsize)*room.furniture_canvas.gridsize;
                 initialX = 0;
+                panel.setLocation(initialX,initialY);
                 break;
             case "r":
+                System.out.println("R selected");
                 initialY = Math.floorDiv(y,room.furniture_canvas.gridsize)*room.furniture_canvas.gridsize;
                 initialX = room.getWidth()-panel_size;
+                panel.setLocation(initialX,initialY);
                 break;
         }
-        panel.setLocation(initialX,initialY);
+
+
+        System.out.println("Initial coords:"+initialX+" "+initialY);
     }
     public void mouseDragged(MouseEvent e) {
         int x = e.getX();
@@ -853,44 +908,55 @@ class opening_MouseAdapter extends MouseAdapter {
 
         int length;
         int height;
-        switch (type) {
+        switch (side) {
             case "t":
 
                 length = Math.floorDiv(x,room.furniture_canvas.gridsize)*room.furniture_canvas.gridsize-initialX;
+
                 if(length<0){
-                    initialX = x;
-                    panel.setLocation(initialX,initialY);
+
+                    panel.setLocation(x,initialY);
                     length= -length;
                 }
+
                 panel.setSize(length,panel_size);
                 break;
 
             case "b":
                 length = Math.floorDiv(x,room.furniture_canvas.gridsize)*room.furniture_canvas.gridsize-initialX;
+
                 if(length<0){
-                    initialX = x;
-                    panel.setLocation(initialX,initialY);
+
+                    panel.setLocation(x,initialY);
                     length= -length;
                 }
+
+
                 panel.setSize(length,panel_size);
                 break;
 
             case "l":
-                height = Math.floorDiv(y,room.furniture_canvas.gridsize)*room.furniture_canvas.gridsize-y;
+                height = Math.floorDiv(y,room.furniture_canvas.gridsize)*room.furniture_canvas.gridsize-initialY;
+
                 if(height<0){
-                    initialY = y;
-                    panel.setLocation(initialX,initialY);
+
+                    panel.setLocation(initialX,y);
                     height= -height;
                 }
+
+
                 panel.setSize(panel_size,height);
                 break;
             case "r":
-                height = Math.floorDiv(y,room.furniture_canvas.gridsize)*room.furniture_canvas.gridsize-y;
+                height = Math.floorDiv(y,room.furniture_canvas.gridsize)*room.furniture_canvas.gridsize-initialY;
+
                 if(height<0){
-                    initialY = y;
-                    panel.setLocation(initialX,initialY);
+
+                    panel.setLocation(initialX,y);
                     height= -height;
                 }
+
+
                 panel.setSize(panel_size,height);
                 break;
         }
@@ -898,14 +964,19 @@ class opening_MouseAdapter extends MouseAdapter {
     }
     public void mouseReleased(MouseEvent e) {
         if(type.equals("Window")){
-            room.windows.add((RoomWindow)panel);
+            room.openings.add(panel);
 
         }else{
-            room.doors.add(panel);
+            room.openings.add(panel);
         }
         room.removeMouseListener(this);
         room.removeMouseMotionListener(this);
+        room.addMouseListener(room.mouse);
+        room.addMouseMotionListener(room.mouse);
         room.opening_popup.removeAll();
+        System.out.println("ending coords:"+(initialX+panel.getWidth())+" "+(initialY+panel.getHeight()));
+        room.setComponentZOrder(room.furniture_canvas,0);
+
     }
     //door
 

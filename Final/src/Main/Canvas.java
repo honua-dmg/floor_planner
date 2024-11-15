@@ -9,13 +9,14 @@ import java.util.ArrayList;
 
 public class Canvas extends JPanel {
     int[] room_coords = {-1, -1}; // this is used incase we need to add a room wrt another room
+    boolean show_grid = true;
     boolean wrt_room = false;
     ArrayList<Room> rooms;
     JFrame frame;
     int standard_room_width = 100;
     int standard_room_height = 50;
     int gridsize=10;
-    int borderwidth=1;
+    int borderwidth=2;
 
     public Canvas() {
         rooms = new ArrayList<>();
@@ -53,7 +54,7 @@ public class Canvas extends JPanel {
         int x_coord = coords[0];
         int y_coord = coords[1];
 
-        System.out.println("\n\n"+x_coord + " " + y_coord + "  room added here\n\n");
+        //System.out.println("\n\n"+x_coord + " " + y_coord + "  room added here\n\n");
         room.setBounds(x_coord, y_coord, standard_room_width, standard_room_height);
 
         //setComponentZOrder(this, 0);
@@ -155,12 +156,15 @@ public class Canvas extends JPanel {
         g.setColor(new Color(90,90,90));
 
         // Draw the dot grid
-        for (int x = 0; x < getWidth(); x += gridsize*2) {
-            for (int y = 0; y < getHeight(); y += gridsize*2) {
-                g.fillOval(x - 1, y - 1, 2, 2); // Draw a dot (4x4 pixels)
+        if(show_grid){
+            for (int x = 0; x < getWidth(); x += gridsize*2) {
+                for (int y = 0; y < getHeight(); y += gridsize*2) {
+                    g.fillOval(x - 1, y - 1, 2, 2); // Draw a dot (4x4 pixels)
+                }
             }
         }
-        setBorder(BorderFactory.createLineBorder(Color.BLACK,borderwidth));
+
+        //setBorder(BorderFactory.createLineBorder(Color.BLACK,borderwidth));
     }
 
 
