@@ -2,13 +2,15 @@ package openings;
 
 import javax.swing.*;
 import java.awt.*;
+import Main.Room;
 
 public class RoomWindow extends Opening {
     Color room_color;
     String horizontal_or_vertical;
     Boolean opp;
 
-    public RoomWindow(String horizontal_or_vertical, Color color, Boolean opp) {
+    public RoomWindow(Room room,String horizontal_or_vertical, Color color, Boolean opp) {
+        super(room);
         this.room_color = color;
         this.horizontal_or_vertical = horizontal_or_vertical;
         this.opp = opp;
@@ -46,7 +48,7 @@ public class RoomWindow extends Opening {
 
 
         // Define the width of each alternating color band
-        int stripeSize = 5; // Width of each vertical stripe
+        int stripeSize = 10; // Width of each vertical stripe
 
         // Alternate colors (you can add more colors or patterns as needed)
         Color[] colors = {Color.BLACK, room_color};

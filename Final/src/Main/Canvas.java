@@ -11,8 +11,8 @@ public class Canvas extends JPanel {
     int[] room_coords = {-1, -1}; // this is used incase we need to add a room wrt another room
     boolean furniture_canvas = false;
     boolean wrt_room = false;
-    ArrayList<Room> rooms;
-    JFrame frame;
+    public ArrayList<Room> rooms;
+    public JFrame frame;
     int standard_room_width = 100;
     int standard_room_height = 50;
     int gridsize=10;
@@ -30,9 +30,7 @@ public class Canvas extends JPanel {
     public void set_color(Color x){
         setBackground(x);
     }
-    public void setGridsize(int x){
-        gridsize=x;
-    }
+
 
     public void addRoom(Room room) {
 
@@ -153,7 +151,10 @@ public class Canvas extends JPanel {
         super.paintComponent(g); // Call the superclass method to ensure proper painting
 
         // Set the color for the dots
-        g.setColor(new Color(90,90,90));
+        if(furniture_canvas){
+            g.setColor(new Color(70,70,70));
+        }else{
+        g.setColor(Color.LIGHT_GRAY);}
 
         // Draw the dot grid
         int x;

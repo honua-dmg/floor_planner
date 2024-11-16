@@ -5,28 +5,28 @@ import openings.*;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
-import java.lang.reflect.Array;
+
 import java.util.ArrayList;
 
 
 public class Room extends JPanel {
 
-    ArrayList<Opening> openings = new ArrayList<>();
+    public ArrayList<Opening> openings = new ArrayList<>();
+    public ArrayList<Room> furnitures = new ArrayList<Room>();
 
-    ArrayList<Room> furnitures = new ArrayList<Room>();
-    Canvas canvas;
-    Canvas furniture_canvas;
+    public Canvas canvas;
+    public Canvas furniture_canvas;
 
-    MouseAdapter mouse;
+    public MouseAdapter mouse;
 
     HotCorner lt;
     HotCorner rb;
 
-    int borderwidth;
+    public int borderwidth;
     int gridSize;
 
 
-    Color color;
+    public Color color;
     // popup menu
     JPopupMenu popup = new JPopupMenu();
     JMenuItem rotate = new JMenuItem("Rotate");
@@ -54,7 +54,7 @@ public class Room extends JPanel {
 
     // doors
 
-    JPopupMenu opening_popup = new JPopupMenu();
+    public JPopupMenu opening_popup = new JPopupMenu();
     JMenuItem opening_type =  new JMenuItem("Type");
 
     JMenuItem top_door = new JMenuItem("Top");
@@ -63,7 +63,10 @@ public class Room extends JPanel {
     JMenuItem right_door = new JMenuItem("Right");
 
     //removing options
-
+    JPopupMenu delete_options = new JPopupMenu("Delete Options");
+    JMenuItem remove_opening = new JMenuItem("Opening");
+    JMenuItem remove_room = new JMenuItem("Room");
+    JMenuItem remove_furniture = new JMenuItem("Furniture");
 
     public void orientation_options(String side){
         switch(side){
@@ -110,11 +113,11 @@ public class Room extends JPanel {
                 canvas.room_coords[1] = this.getY()+this.getHeight()-canvas.standard_room_height;
                 break;
             case "centerX":
-                int newX = Math.floorDiv(canvas.standard_room_width/2,10)*10;;
+                int newX = Math.floorDiv(canvas.standard_room_width/2,10)*10;
                 canvas.room_coords[0] = this.getX()+Math.floorDiv(this.getWidth()/2,10)*10-newX;
                 break;
             case "centerY":
-                int newY = Math.floorDiv(canvas.standard_room_height/2,10)*10;;
+                int newY = Math.floorDiv(canvas.standard_room_height/2,10)*10;
                 canvas.room_coords[1]= this.getY()+Math.floorDiv(this.getHeight()/2,10)*10-newY;
                 break;
 
@@ -230,11 +233,14 @@ public class Room extends JPanel {
                                         connected = false;
                                         // regular coords mechanism
                                         // find new x coord wrt grid size
-                                        NewX = Math.floorDiv(getX() + e.getX() - X, gridSize) * gridSize;
+                                        //NewX = Math.floorDiv(getX() + e.getX() - X, gridSize) * gridSize;
+                                        NewX = get_grid_coords(getX() + e.getX() - X);
                                         // find new y coord wrt grid size
-                                        newY = Math.floorDiv(getY() + e.getY() - Y, gridSize) * gridSize;
+                                        //newY = Math.floorDiv(getY() + e.getY() - Y, gridSize) * gridSize;
+                                        newY = get_grid_coords(getY() + e.getY() - Y);
                                     } else {
-                                        newY = Math.floorDiv(getY() + e.getY() - Y, gridSize) * gridSize;
+                                        //newY = Math.floorDiv(getY() + e.getY() - Y, gridSize) * gridSize;
+                                        newY = get_grid_coords(getY() + e.getY() - Y);
                                     }
                                     break;
                                 case "r":
@@ -243,11 +249,14 @@ public class Room extends JPanel {
                                         connected = false;
                                         // regular coords mechanism
                                         // find new x coord wrt grid size
-                                        NewX = Math.floorDiv(getX() + e.getX() - X, gridSize) * gridSize;
+                                        //NewX = Math.floorDiv(getX() + e.getX() - X, gridSize) * gridSize;
+                                        NewX = get_grid_coords(getX() + e.getX() - X);
                                         // find new y coord wrt grid size
-                                        newY = Math.floorDiv(getY() + e.getY() - Y, gridSize) * gridSize;
+                                        //newY = Math.floorDiv(getY() + e.getY() - Y, gridSize) * gridSize;
+                                        newY = get_grid_coords(getY() + e.getY() - Y);
                                     } else {
-                                        newY = Math.floorDiv(getY() + e.getY() - Y, gridSize) * gridSize;
+                                        //newY = Math.floorDiv(getY() + e.getY() - Y, gridSize) * gridSize;
+                                        newY = get_grid_coords(getY() + e.getY() - Y);
                                     }
                                     break;
                                 case "t":
@@ -256,11 +265,14 @@ public class Room extends JPanel {
                                         connected = false;
                                         // regular coords mechanism
                                         // find new x coord wrt grid size
-                                        NewX = Math.floorDiv(getX() + e.getX() - X, gridSize) * gridSize;
+                                        //NewX = Math.floorDiv(getX() + e.getX() - X, gridSize) * gridSize;
+                                        NewX = get_grid_coords(getX() + e.getX() - X);
                                         // find new y coord wrt grid size
-                                        newY = Math.floorDiv(getY() + e.getY() - Y, gridSize) * gridSize;
+                                        //newY = Math.floorDiv(getY() + e.getY() - Y, gridSize) * gridSize;
+                                        newY = get_grid_coords(getY() + e.getY() - Y);
                                     } else {
-                                        NewX = Math.floorDiv(getX() + e.getX() - X, gridSize) * gridSize;
+                                        //NewX = Math.floorDiv(getX() + e.getX() - X, gridSize) * gridSize;
+                                        NewX = get_grid_coords(getX() + e.getX() - X);
                                     }
                                     break;
                                 case "b":
@@ -269,11 +281,14 @@ public class Room extends JPanel {
                                         connected = false;
                                         // regular coords mechanism
                                         // find new x coord wrt grid size
-                                        NewX = Math.floorDiv(getX() + e.getX() - X, gridSize) * gridSize;
+                                        //NewX = Math.floorDiv(getX() + e.getX() - X, gridSize) * gridSize;
+                                        NewX = get_grid_coords(getX() + e.getX() - X);
                                         // find new y coord wrt grid size
-                                        newY = Math.floorDiv(getY() + e.getY() - Y, gridSize) * gridSize;
+                                        //newY = Math.floorDiv(getY() + e.getY() - Y, gridSize) * gridSize;
+                                        newY = get_grid_coords(getY() + e.getY() - Y);
                                     } else {
-                                        NewX = Math.floorDiv(getX() + e.getX() - X, gridSize) * gridSize;
+                                        //NewX = Math.floorDiv(getX() + e.getX() - X, gridSize) * gridSize;
+                                        NewX = get_grid_coords(getX() + e.getX() - X);
                                     }
                                     break;
 
@@ -288,9 +303,11 @@ public class Room extends JPanel {
                 // there is no room nearby
                 else{
                     // find new x coord wrt grid size
-                    NewX = Math.floorDiv(getX() + e.getX() - X, gridSize) * gridSize;
+                    //NewX = Math.floorDiv(getX() + e.getX() - X, gridSize) * gridSize;
+                    NewX = get_grid_coords(getX() + e.getX() - X);
                     // find new y coord wrt grid size
-                    newY = Math.floorDiv(getY() + e.getY() - Y, gridSize) * gridSize;
+                    //newY = Math.floorDiv(getY() + e.getY() - Y, gridSize) * gridSize;
+                    newY = get_grid_coords(getY() + e.getY() - Y);
 
                 }
 
@@ -314,7 +331,7 @@ public class Room extends JPanel {
                     //canvas.update_context_manager((Room)e.getComponent());
                 } else {
                     //canvas.update_context_manager((Room)e.getComponent());
-                    System.out.println("room not overlap");
+                    //System.out.println("room not overlap");
                 }
             }
 
@@ -343,7 +360,6 @@ public class Room extends JPanel {
         furniture_canvas = new Canvas();
         furniture_canvas.furniture_canvas=true;
         furniture_canvas.set_color(color);
-        furniture_canvas.setGridsize(10);
         furniture_canvas.setLocation(borderwidth, borderwidth);
         furniture_canvas.setSize(getWidth()-borderwidth*2, getHeight()-borderwidth*2);
         furniture_canvas.setVisible(true);
@@ -366,12 +382,27 @@ public class Room extends JPanel {
         });
 
         // delete option
+        delete_options.add(remove_room);
+        delete_options.add(remove_opening);
+        delete_options.add(remove_furniture);
         popup.add(delete);
         delete.addActionListener(e -> {
+            delete_options.show(canvas,this.getX(),this.getY());
+        });
+        remove_room.addActionListener(e -> {
             canvas.remove(this);
             canvas.rooms.remove(this);
             canvas.revalidate();
             canvas.repaint();
+        });
+        remove_opening.addActionListener(e -> {
+            // highlight (white border) all openings, bring them forward
+            for(Opening opening: openings){
+                System.out.println(opening.toString());
+                setComponentZOrder(opening,0);
+                opening.setBorder(BorderFactory.createLineBorder(Color.WHITE, 4));
+                opening.add_listener();
+            }
         });
 
         // add room segment
@@ -437,28 +468,28 @@ public class Room extends JPanel {
             opening_popup.show(canvas, this.getX(), this.getY());
         });
         left_door.addActionListener(e -> {
-            opening_MouseAdapter adapter = new opening_MouseAdapter(this,canvas,"l",opening_type.getText());
+            Opening_MouseAdapter adapter = new Opening_MouseAdapter(this,canvas,"l",opening_type.getText());
             removeMouseListener(mouse);
             removeMouseMotionListener(mouse);
             addMouseListener(adapter);
             addMouseMotionListener(adapter);
         });
         right_door.addActionListener(e -> {
-            opening_MouseAdapter adapter = new opening_MouseAdapter(this,canvas,"r",opening_type.getText());
+            Opening_MouseAdapter adapter = new Opening_MouseAdapter(this,canvas,"r",opening_type.getText());
             removeMouseListener(mouse);
             removeMouseMotionListener(mouse);
             addMouseListener(adapter);
             addMouseMotionListener(adapter);
         });
         top_door.addActionListener(e -> {
-            opening_MouseAdapter adapter = new opening_MouseAdapter(this,canvas,"t",opening_type.getText());
+            Opening_MouseAdapter adapter = new Opening_MouseAdapter(this,canvas,"t",opening_type.getText());
             removeMouseListener(mouse);
             removeMouseMotionListener(mouse);
             addMouseListener(adapter);
             addMouseMotionListener(adapter);
         });
         bottom_door.addActionListener(e -> {
-            opening_MouseAdapter adapter = new opening_MouseAdapter(this,canvas,"b",opening_type.getText());
+            Opening_MouseAdapter adapter = new Opening_MouseAdapter(this,canvas,"b",opening_type.getText());
             removeMouseListener(mouse);
             removeMouseMotionListener(mouse);
             addMouseListener(adapter);
@@ -579,6 +610,8 @@ public class Room extends JPanel {
 
         return null;
     }
+
+
     // check for nearby rooms
     public Nearby isroomnearby() {
 
@@ -670,6 +703,7 @@ public class Room extends JPanel {
     public int get_grid_coords(int x){
         int newX = Math.floorDiv(x,gridSize)*gridSize;
 
+
         if(canvas.furniture_canvas){
             newX-=borderwidth;
         }
@@ -677,6 +711,9 @@ public class Room extends JPanel {
     }
 
 }
+
+
+
 
 class HotCorner extends JPanel {
     int gridSize;
@@ -774,8 +811,6 @@ class HotCorner extends JPanel {
                 // TODO: DELETE THIS LATER
                 owner.setComponentZOrder(e.getComponent(), 0);
                 //owner.canvas.update_context_manager(owner);
-
-
             }
 
             // this function deals with snapping to the grid
@@ -790,13 +825,15 @@ class HotCorner extends JPanel {
                     // as opposed to bigger because I believe it'll be easier on the overlap checker if we do this
                     // also decreases the likelihood of the overlap checker being called in the first place
                     case "lt":
-                        newYcoord = Math.floorDiv(owner.getY(), gridSize) * gridSize;
+                        //newYcoord = Math.floorDiv(owner.getY(), gridSize) * gridSize;
+                        newYcoord = owner.get_grid_coords(owner.getY());
 
                         if (newYcoord < owner.getY()) {
                             newYcoord += 10;
                         }
 
-                        newXcoord = Math.floorDiv(owner.getX(), gridSize) * gridSize;
+                        //newXcoord = Math.floorDiv(owner.getX(), gridSize) * gridSize;
+                        newXcoord = owner.get_grid_coords(owner.getX());
                         if (newXcoord < owner.getX()) {
                             newXcoord += 10;
                         }
@@ -815,8 +852,10 @@ class HotCorner extends JPanel {
 
                         break;
                     case "rb":
-                        newWidth = Math.floorDiv(owner.getWidth(), gridSize) * gridSize;
-                        newHeight = Math.floorDiv(owner.getHeight(), gridSize) * gridSize;
+                        //newWidth = Math.floorDiv(owner.getWidth(), gridSize) * gridSize;
+                        newWidth = owner.get_grid_coords(owner.getWidth());
+                        //newHeight = Math.floorDiv(owner.getHeight(), gridSize) * gridSize;
+                        newHeight = owner.get_grid_coords(owner.getHeight());
                         owner.setSize(newWidth, newHeight);
                         owner.furniture_canvas.setSize(owner.getWidth()-owner.borderwidth*2, owner.getHeight()-owner.borderwidth*2);
                         setLocation(owner.getWidth() - 10 - borderwidth, owner.getHeight() - 10 - borderwidth);
@@ -840,160 +879,5 @@ class HotCorner extends JPanel {
     }
 }
 
-class opening_MouseAdapter extends MouseAdapter {
-    Room room;
-    Canvas canvas;
-    int initialX;
-    int initialY;
-    String type;
-    String side;
-    int panel_size = 10;
-    Opening panel;
-    // decide panel
-    public opening_MouseAdapter(Room room,Canvas canvas,String side,String type) {
-        this.room = room;
-        this.canvas= canvas;
-        this.type = type; // door or window - deal with window later
-        this.side=side;
-        if(type.equals("door")){
-            panel = new Opening();
-            //panel.setBackground(Color.WHITE);
-            panel.setBackground(room.color);
-        }
-        else {
-            switch (side) {
-                case "l":
-                    panel = new RoomWindow("vertical",room.color,false);
-                    break;
-                case "r":
-                    panel = new RoomWindow("vertical",room.color,true);
-                    break;
-                case "t":
-                    panel = new RoomWindow("horizontal",room.color,false);
-                    break;
-                case "b":
-                    panel = new RoomWindow("horizontal",room.color,true);
-            }
 
-        }
-        room.add(panel);
-        System.out.println("Door added!");
-    }
-    public void mousePressed(MouseEvent e) {
-        int x = e.getX();
-        int y = e.getY();
-        System.out.println(x+","+y);
-        switch (side) {
-            case "t":
-                System.out.println("TOP selected");
-                initialX = Math.floorDiv(x,room.furniture_canvas.gridsize)*room.furniture_canvas.gridsize;
-                initialY =0;
-                panel.setLocation(initialX,initialY);
-
-
-                break;
-            case "b":
-                System.out.println("B selected");
-                initialX = Math.floorDiv(x,room.furniture_canvas.gridsize)*room.furniture_canvas.gridsize;
-                initialY =room.getHeight()-panel_size;
-                panel.setLocation(initialX,initialY);
-                break;
-
-            case "l":
-                System.out.println("L selected");
-                initialY = Math.floorDiv(y,room.furniture_canvas.gridsize)*room.furniture_canvas.gridsize;
-                initialX = 0;
-                panel.setLocation(initialX,initialY);
-                break;
-            case "r":
-                System.out.println("R selected");
-                initialY = Math.floorDiv(y,room.furniture_canvas.gridsize)*room.furniture_canvas.gridsize;
-                initialX = room.getWidth()-panel_size;
-                panel.setLocation(initialX,initialY);
-                break;
-        }
-
-
-        System.out.println("Initial coords:"+initialX+" "+initialY);
-    }
-    public void mouseDragged(MouseEvent e) {
-        int x = e.getX();
-        int y = e.getY();
-
-        int length;
-        int height;
-        switch (side) {
-            case "t":
-
-                length = Math.floorDiv(x,room.furniture_canvas.gridsize)*room.furniture_canvas.gridsize-initialX;
-
-                if(length<0){
-
-                    panel.setLocation(x,initialY);
-                    length= -length;
-                }
-
-                panel.setSize(length,panel_size);
-                break;
-
-            case "b":
-                length = Math.floorDiv(x,room.furniture_canvas.gridsize)*room.furniture_canvas.gridsize-initialX;
-
-                if(length<0){
-
-                    panel.setLocation(x,initialY);
-                    length= -length;
-                }
-
-
-                panel.setSize(length,panel_size);
-                break;
-
-            case "l":
-                height = Math.floorDiv(y,room.furniture_canvas.gridsize)*room.furniture_canvas.gridsize-initialY;
-
-                if(height<0){
-
-                    panel.setLocation(initialX,y);
-                    height= -height;
-                }
-
-
-                panel.setSize(panel_size,height);
-                break;
-            case "r":
-                height = Math.floorDiv(y,room.furniture_canvas.gridsize)*room.furniture_canvas.gridsize-initialY;
-
-                if(height<0){
-
-                    panel.setLocation(initialX,y);
-                    height= -height;
-                }
-
-
-                panel.setSize(panel_size,height);
-                break;
-        }
-        panel.repaint();
-    }
-    public void mouseReleased(MouseEvent e) {
-        if(type.equals("Window")){
-            room.openings.add(panel);
-
-        }else{
-            room.openings.add(panel);
-        }
-        room.removeMouseListener(this);
-        room.removeMouseMotionListener(this);
-        room.addMouseListener(room.mouse);
-        room.addMouseMotionListener(room.mouse);
-        room.opening_popup.removeAll();
-        System.out.println("ending coords:"+(initialX+panel.getWidth())+" "+(initialY+panel.getHeight()));
-        room.setComponentZOrder(room.furniture_canvas,0);
-
-    }
-    //door
-
-
-}
 
