@@ -1,13 +1,20 @@
 package Main;
 
+import javax.swing.*;
+import java.sql.Array;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 
 public class _ConnectedRooms{
-    ArrayList<Room> left = new ArrayList<Room>();
-    ArrayList<Room> right = new ArrayList<Room>();
-    ArrayList<Room> top = new ArrayList<Room>();
-    ArrayList<Room> bottom = new ArrayList<Room>();
+    public ArrayList<Room> left = new ArrayList<Room>();
+    public ArrayList<Room> right = new ArrayList<Room>();
+    public ArrayList<Room> top = new ArrayList<Room>();
+    public ArrayList<Room> bottom = new ArrayList<Room>();
     public void add(Room room,String side){
+        if (side==null){
+            return;
+        }
         switch(side){
             case "l":
                 left.add(room);
@@ -21,7 +28,14 @@ public class _ConnectedRooms{
             case "b":
                 bottom.add(room);
                 break;
+
+
         }
     }
-
+    public void sort(){
+        left.sort(Comparator.comparingInt(Room::getX));
+        right.sort(Comparator.comparingInt(Room::getX));
+        top.sort(Comparator.comparingInt(Room::getX));
+        bottom.sort(Comparator.comparingInt(Room::getX));
+    }
 }

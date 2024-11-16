@@ -574,17 +574,7 @@ public class Room extends JPanel {
     }
     // generic overlap
     public boolean overlap(int ltx1, int lty1, int rbx1, int rby1, int ltx2, int lty2, int rbx2, int rby2) {
-        /*
-        boolean overlap = false;
-        if (ltx1 < rbx2 && rbx1 > ltx2) {
-            if (rby1 > lty2 && lty1 < rby2) {
-                overlap = true;
-            }
 
-        }
-        return overlap;
-
-         */
         return (ltx1 < rbx2 && rbx1 > ltx2 && lty1 < rby2 && rby1 > lty2);
     }
     // check if the rooms are connected
@@ -593,19 +583,19 @@ public class Room extends JPanel {
         // bottom                               // top
         if(room.getY()+room.getHeight()==getY() ){
             //System.out.println("tb match;");
-            return "b";
+            return "t";
 
         }
         if(getY()+getHeight()==room.getY()){
-            return "t";
+            return "b";
         }
         // left                            // right
         if(room.getX()==getX()+getWidth()) {
             //System.out.println("s match;"+getY());
-            return "l";
+            return "r";
         }
         if(getX()==room.getX()+room.getWidth()){
-            return "r";
+            return "l";
         }
 
         return null;
@@ -699,14 +689,10 @@ public class Room extends JPanel {
             this.room = room;
         }
     }
-
     public int get_grid_coords(int x){
         int newX = Math.floorDiv(x,gridSize)*gridSize;
-
-
         if(canvas.furniture_canvas){
-            newX-=borderwidth;
-        }
+            newX-=borderwidth;}
         return  newX;
     }
 
