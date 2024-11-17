@@ -18,7 +18,7 @@ public class Opening_MouseAdapter extends MouseAdapter {
     int initialY;
     String type;
     String side;
-    int panel_size = 2;
+    int panel_size =4;
     Opening panel;
     _ConnectedRooms connectedRooms;
     ArrayList<Integer> bounds = new ArrayList<>();

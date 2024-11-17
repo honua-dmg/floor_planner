@@ -16,7 +16,7 @@ public class Canvas extends JPanel {
     int standard_room_width = 100;
     int standard_room_height = 50;
     int gridsize=10;
-    int borderwidth=2;
+    int borderwidth=4;
 
     public Canvas() {
         rooms = new ArrayList<>();

@@ -39,16 +39,19 @@ class Adapter extends MouseAdapter {
     Room room;
     Opening opening;
     public Adapter(Room room,Opening opening) {
+
+        this.room = room;
+        this.opening = opening;
         System.out.println("Listener Added!");
+        room.setComponentZOrder(opening,0);
+        opening.setBorder(BorderFactory.createLineBorder(Color.PINK, 4));
         if(opening.getHeight()==room.borderwidth){
             opening.setSize(opening.getWidth(),10);
         }
         if(opening.getWidth()==room.borderwidth){
             opening.setSize(10,opening.getHeight());
         }
-        opening.repaint();
-        this.room = room;
-        this.opening = opening;
+        room.repaint();
     }
     public void mousePressed(MouseEvent e) {
 
@@ -56,17 +59,41 @@ class Adapter extends MouseAdapter {
         room.remove(opening);
         room.repaint();
         room.openings.remove(opening);
-
-
-    }
-    public void mouseReleased(MouseEvent e) {
+        System.out.println("Opening clicked Released!");
         for(Opening opening:room.openings){
+            System.out.println(opening.type);
+            if(opening.getHeight()==10){
+                opening.setSize(opening.getWidth(),room.borderwidth);
+            }
+            if(opening.getWidth()==10){
+                opening.setSize(room.borderwidth,opening.getHeight());
+            }
 
+            opening.setBorder(BorderFactory.createLineBorder(Color.PINK, 0));
+            room.repaint();
+            room.revalidate();
             opening.removeMouseListener(opening.adapter);
-            opening.setBorder(null);
-
         }
-        room.repaint();
+
+    }/*
+    public void mouseReleased(MouseEvent e) {
+        System.out.println("Opening clicked Released!");
+        for(Opening opening:room.openings){
+            System.out.println(opening.type);
+            if(opening.getHeight()==10){
+                opening.setSize(opening.getWidth(),room.borderwidth);
+            }
+            if(opening.getWidth()==10){
+                opening.setSize(room.borderwidth,opening.getHeight());
+            }
+
+            opening.setBorder(BorderFactory.createLineBorder(Color.PINK, 0));
+            room.repaint();
+            room.revalidate();
+            opening.removeMouseListener(opening.adapter);
+        }
+
     }
+    */
 }
 

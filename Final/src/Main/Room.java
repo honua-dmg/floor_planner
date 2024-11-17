@@ -399,8 +399,7 @@ public class Room extends JPanel {
             // highlight (white border) all openings, bring them forward
             for(Opening opening: openings){
                 System.out.println(opening.toString());
-                setComponentZOrder(opening,0);
-                opening.setBorder(BorderFactory.createLineBorder(Color.WHITE, 4));
+
                 opening.add_listener();
             }
         });
