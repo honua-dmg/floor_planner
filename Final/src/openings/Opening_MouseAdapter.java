@@ -148,19 +148,20 @@ public class Opening_MouseAdapter extends MouseAdapter {
     public void add_bounds(int con_room_coord,int cont_room_len,int room_coord,int room_len){
         int lower;
         int upper;
-        if(con_room_coord<room_coord){
-            return;
-        }
-        if((con_room_coord+cont_room_len)>room_len+room_coord){
-            return;
-        }
-        lower = con_room_coord;
+
+
+        lower = con_room_coord-room_coord;
 
 
         upper = con_room_coord+cont_room_len-room_coord;
 
-        bounds.add(lower);
-        bounds.add(upper);
+        if(!(con_room_coord<room_coord)){
+            bounds.add(lower);
+        }
+        if(!((con_room_coord+cont_room_len)>room_len+room_coord)){
+            bounds.add(upper);
+        }
+
     }
     public void mousePressed(MouseEvent e) {
         int x = e.getX();
@@ -169,6 +170,7 @@ public class Opening_MouseAdapter extends MouseAdapter {
         bounds.sort(Comparator.naturalOrder());
         switch (side) {
             case "t":
+
                 for(int bound: bounds){
                     if(x>bound){
                         lowerbound = bound;
