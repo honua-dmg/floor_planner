@@ -17,6 +17,7 @@ public class Opening extends JPanel {
     Room room;
     Adapter adapter;
 
+
     public Opening(Room room) {
         this.room = room;
 
@@ -39,6 +40,13 @@ class Adapter extends MouseAdapter {
     Opening opening;
     public Adapter(Room room,Opening opening) {
         System.out.println("Listener Added!");
+        if(opening.getHeight()==room.borderwidth){
+            opening.setSize(opening.getWidth(),10);
+        }
+        if(opening.getWidth()==room.borderwidth){
+            opening.setSize(10,opening.getHeight());
+        }
+        opening.repaint();
         this.room = room;
         this.opening = opening;
     }
@@ -53,6 +61,7 @@ class Adapter extends MouseAdapter {
     }
     public void mouseReleased(MouseEvent e) {
         for(Opening opening:room.openings){
+
             opening.removeMouseListener(opening.adapter);
             opening.setBorder(null);
 

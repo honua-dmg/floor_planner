@@ -19,8 +19,8 @@ public class Room extends JPanel {
 
     public MouseAdapter mouse;
 
-    HotCorner lt;
-    HotCorner rb;
+     HotCorner lt;
+     HotCorner rb;
 
     public int borderwidth;
     int gridSize;
@@ -456,6 +456,7 @@ public class Room extends JPanel {
             opening_popup.add(top_door);
             opening_popup.add(bottom_door);
             opening_popup.show(canvas, this.getX(), this.getY());
+            remove_hotcorner_listner();
         });
         window.addActionListener(e -> {
             opening_type.setText("window");
@@ -466,6 +467,7 @@ public class Room extends JPanel {
             opening_popup.add(top_door);
             opening_popup.add(bottom_door);
             opening_popup.show(canvas, this.getX(), this.getY());
+            remove_hotcorner_listner();
         });
         left_door.addActionListener(e -> {
             Opening_MouseAdapter adapter = new Opening_MouseAdapter(this,canvas,"l",opening_type.getText());
@@ -528,6 +530,20 @@ public class Room extends JPanel {
         setComponentZOrder(rb,1);
 
 
+    }
+
+    public void remove_hotcorner_listner(){
+        lt.removeMouseListener(lt.hotcornermouse);
+        lt.removeMouseMotionListener(lt.hotcornermouse);
+        rb.removeMouseListener(rb.hotcornermouse);
+        rb.removeMouseMotionListener(rb.hotcornermouse);
+
+    }
+    public void add_hotcorner_listner(){
+        lt.addMouseListener(lt.hotcornermouse);
+        lt.addMouseMotionListener(lt.hotcornermouse);
+        rb.addMouseListener(rb.hotcornermouse);
+        rb.addMouseMotionListener(rb.hotcornermouse);
     }
     // rotate room - toDO incomplete
     public void rotate() {
@@ -705,6 +721,7 @@ class HotCorner extends JPanel {
     int gridSize;
     int borderwidth;
     Room owner;
+    MouseAdapter hotcornermouse;
 
     public HotCorner(Room owner, String corner, Color x, int gridSize, int borderwidth) {
         setBackground(Color.PINK); // TODO: DELETE THIS LATER
@@ -712,7 +729,7 @@ class HotCorner extends JPanel {
         this.borderwidth= borderwidth;
         this.owner = owner;
         // most of the work is done here:
-        MouseAdapter hotcornermouse = new MouseAdapter() {
+        hotcornermouse = new MouseAdapter() {
             final int minsize = 40;
 
             int X;// mouse coords

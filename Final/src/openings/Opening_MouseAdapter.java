@@ -18,7 +18,7 @@ public class Opening_MouseAdapter extends MouseAdapter {
     int initialY;
     String type;
     String side;
-    int panel_size = 10;
+    int panel_size = 2;
     Opening panel;
     _ConnectedRooms connectedRooms;
     ArrayList<Integer> bounds = new ArrayList<>();
@@ -55,6 +55,8 @@ public class Opening_MouseAdapter extends MouseAdapter {
                 panel.setType("window");
             }
         }
+
+
 
         room.add(panel);
         // which rooms are connected? and which side?
@@ -147,15 +149,16 @@ public class Opening_MouseAdapter extends MouseAdapter {
         int lower;
         int upper;
         if(con_room_coord<room_coord){
-            lower = room_coord;
-        }else{
-            lower = con_room_coord;
+            return;
         }
         if((con_room_coord+cont_room_len)>room_len+room_coord){
-            upper = room_len;
-        }else{
-            upper = con_room_coord+cont_room_len-room_coord;
+            return;
         }
+        lower = con_room_coord;
+
+
+        upper = con_room_coord+cont_room_len-room_coord;
+
         bounds.add(lower);
         bounds.add(upper);
     }
@@ -174,6 +177,7 @@ public class Opening_MouseAdapter extends MouseAdapter {
                 }
                 //initialX = Math.floorDiv(x,room.furniture_canvas.gridsize)*room.furniture_canvas.gridsize;
                 initialX = room.get_grid_coords(x);
+
                 initialY =0;
                 panel.setLocation(initialX,initialY);
 
@@ -191,6 +195,7 @@ public class Opening_MouseAdapter extends MouseAdapter {
                 //initialX = Math.floorDiv(x,room.furniture_canvas.gridsize)*room.furniture_canvas.gridsize;
                 initialX = room.get_grid_coords(x);
                 initialY =room.getHeight()-panel_size;
+
                 panel.setLocation(initialX,initialY);
                 break;
 
@@ -205,6 +210,7 @@ public class Opening_MouseAdapter extends MouseAdapter {
                 //initialY = Math.floorDiv(y,room.furniture_canvas.gridsize)*room.furniture_canvas.gridsize;
                 initialY = room.get_grid_coords(y);
                 initialX = 0;
+
                 panel.setLocation(initialX,initialY);
                 break;
             case "r":
@@ -218,6 +224,7 @@ public class Opening_MouseAdapter extends MouseAdapter {
                 //initialY = Math.floorDiv(y,room.furniture_canvas.gridsize)*room.furniture_canvas.gridsize;
                 initialY = room.get_grid_coords(y);
                 initialX = room.getWidth()-panel_size;
+
                 panel.setLocation(initialX,initialY);
                 break;
         }
@@ -229,9 +236,10 @@ public class Opening_MouseAdapter extends MouseAdapter {
     public void mouseDragged(MouseEvent e) {
         int x = e.getX();
         int y = e.getY();
-        if(x>room.getWidth() || x<0 || y>room.getHeight() || y<0){
-            Canvas.showDialog(canvas.frame,"Keep the door inside!!");
-            remove_opening();
+        if(x>room.getWidth() || x<0|| y>room.getHeight() || y<0){
+            //Canvas.showDialog(canvas.frame,"Keep the door inside!!");
+            return;
+            //remove_opening();
         }
 
         int length;
@@ -309,16 +317,15 @@ public class Opening_MouseAdapter extends MouseAdapter {
         panel.repaint();
     }
     public void mouseReleased(MouseEvent e) {
-        if(type.equals("Window")){
-            room.openings.add(panel);
 
-        }else{
-            room.openings.add(panel);
-        }
+
+        room.openings.add(panel);
+
         room.removeMouseListener(this);
         room.removeMouseMotionListener(this);
         room.addMouseListener(room.mouse);
         room.addMouseMotionListener(room.mouse);
+        room.add_hotcorner_listner();
         room.opening_popup.removeAll();
         System.out.println("ending coords:"+(initialX+panel.getWidth())+" "+(initialY+panel.getHeight()));
         room.setComponentZOrder(room.furniture_canvas,0);
