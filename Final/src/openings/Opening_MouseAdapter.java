@@ -57,76 +57,107 @@ public class Opening_MouseAdapter extends MouseAdapter {
         }
 
         room.add(panel);
+        // which rooms are connected? and which side?
         connectedRooms = new _ConnectedRooms();
-
         for(Room x:canvas.rooms){
-            connectedRooms.add(x,room.areconnected(x));
+            if(x.getX()!=room.getX()&&x.getY()!=room.getY()){
+                connectedRooms.add(x,room.areconnected(x));
+            }
+
         }
         connectedRooms.sort();
+
+
         switch(side){
             case "t":
-                bounds.add(0);
-                bounds.add(room.getWidth());
+
                 if(connectedRooms.top.isEmpty()){
+                    bounds.add(0);
+                    bounds.add(room.getWidth());
                     break;
                 }
                 for(Room room1:connectedRooms.top){
-                    bounds.add(room1.getX()-room.getX());
-                    if((room1.getX()+room1.getWidth())<room.getWidth()+room.getX()){
-                        bounds.add(room1.getX()+room1.getWidth()-(room.getWidth()+room.getX()));
-                    }
-
+                    add_bounds(room1.getX(),room1.getWidth(),room.getX(),room.getWidth());
                 }
-                //Collections.sort(bounds);
-
+                if(!bounds.contains(0)){
+                    bounds.add(0);}
+                if(!bounds.contains(room.getWidth())){
+                    bounds.add(room.getWidth());}
+                Collections.sort(bounds);
                 break;
             case "b":
-                bounds.add(0);
-                bounds.add(room.getWidth());
                 if(connectedRooms.bottom.isEmpty()){
+                    bounds.add(0);
+                    bounds.add(room.getWidth());
                     break;
                 }
                 for(Room room1:connectedRooms.bottom){
-                    bounds.add(room1.getX()-room.getX());
-                    if((room1.getX()+room1.getWidth())<room.getWidth()+room.getX()){
-                        bounds.add(room1.getX()+room1.getWidth()-(room.getWidth()+room.getX()));
-                    }
+                    add_bounds(room1.getX(),room1.getWidth(),room.getX(),room.getWidth());
+                }
+                if(!bounds.contains(0)){
+                    bounds.add(0);
+                }
+                if(!bounds.contains(room.getWidth())){
+                    bounds.add(room.getWidth());
                 }
                 Collections.sort(bounds);
                 break;
             case "r":
-                bounds.add(0);
-                bounds.add(room.getHeight());
+
                 if(connectedRooms.right.isEmpty()){
+                    bounds.add(0);
+                    bounds.add(room.getHeight());
                     break;
                 }
                 for(Room room1:connectedRooms.right){
-                    bounds.add(room1.getY()-room.getY());
-                    if((room1.getY()+room1.getHeight())<room.getHeight()+room.getY()){
-                        bounds.add(room1.getY()+room1.getHeight()-(room.getHeight()+room.getY()));
-                    }
+                    add_bounds(room1.getY(),room1.getHeight(),room.getY(),room.getHeight());
                 }
-                    Collections.sort(bounds);
-
-                break;
-            case "l":
-                bounds.add(0);
-                bounds.add(room.getHeight());
-                if(connectedRooms.left.isEmpty()){
-                    break;
+                if(!bounds.contains(0)){
+                    bounds.add(0);
                 }
-                for(Room room1:connectedRooms.left){
-                    bounds.add(room1.getY()-room.getY());
-                    if((room1.getY()+room1.getHeight())<room.getHeight()+room.getY()){
-                        bounds.add(room1.getY()+room1.getHeight()-(room.getHeight()+room.getY()));
-                    }
+                if(!bounds.contains(room.getHeight())){
+                    bounds.add(room.getHeight());
                 }
                 Collections.sort(bounds);
 
                 break;
+            case "l":
+
+                if(connectedRooms.left.isEmpty()){
+                    bounds.add(0);
+                    bounds.add(room.getHeight());
+                    break;
+                }
+                for(Room room1:connectedRooms.left){
+                    add_bounds(room1.getY(),room1.getHeight(),room.getY(),room.getHeight());
+                }
+                if(!bounds.contains(0)){
+                    bounds.add(0);
+                }
+                if(!bounds.contains(room.getHeight())){
+                    bounds.add(room.getHeight());
+                }
+                Collections.sort(bounds);
+                break;
         }
         //room.openings.add(panel);
         System.out.println("Door added!");
+    }
+    public void add_bounds(int con_room_coord,int cont_room_len,int room_coord,int room_len){
+        int lower;
+        int upper;
+        if(con_room_coord<room_coord){
+            lower = room_coord;
+        }else{
+            lower = con_room_coord;
+        }
+        if((con_room_coord+cont_room_len)>room_len+room_coord){
+            upper = room_len;
+        }else{
+            upper = con_room_coord+cont_room_len-room_coord;
+        }
+        bounds.add(lower);
+        bounds.add(upper);
     }
     public void mousePressed(MouseEvent e) {
         int x = e.getX();
@@ -208,8 +239,9 @@ public class Opening_MouseAdapter extends MouseAdapter {
         switch (side) {
             case "t":
                 if(x>upperbound||x<lowerbound){
-                    Canvas.showDialog(canvas.frame,"Bounds crossed!");
-                    remove_opening();
+                    break;
+                    //Canvas.showDialog(canvas.frame,"Bounds crossed!");
+                    //remove_opening();
                 }
                 //length = Math.floorDiv(x,room.furniture_canvas.gridsize)*room.furniture_canvas.gridsize-initialX;
                 length = room.get_grid_coords(x)-initialX;
@@ -225,8 +257,7 @@ public class Opening_MouseAdapter extends MouseAdapter {
 
             case "b":
                 if(x>upperbound||x<lowerbound){
-                    Canvas.showDialog(canvas.frame,"Bounds crossed!");
-                    remove_opening();
+                    break;
                 }
                 //length = Math.floorDiv(x,room.furniture_canvas.gridsize)*room.furniture_canvas.gridsize-initialX;
                 length = room.get_grid_coords(x)-initialX;
@@ -242,8 +273,9 @@ public class Opening_MouseAdapter extends MouseAdapter {
 
             case "l":
                 if(y>upperbound||y<lowerbound){
-                    Canvas.showDialog(canvas.frame,"Bounds crossed!");
-                    remove_opening();
+                    break;
+                    //Canvas.showDialog(canvas.frame,"Bounds crossed!");
+                    //remove_opening();
                 }
                 //height = Math.floorDiv(y,room.furniture_canvas.gridsize)*room.furniture_canvas.gridsize-initialY;
                 height = room.get_grid_coords(y)-initialY;
@@ -258,8 +290,9 @@ public class Opening_MouseAdapter extends MouseAdapter {
                 break;
             case "r":
                 if(y>upperbound||y<lowerbound){
-                    Canvas.showDialog(canvas.frame,"Bounds crossed!");
-                    remove_opening();
+                    break;
+                    //Canvas.showDialog(canvas.frame,"Bounds crossed!");
+                   //remove_opening();
                 }
                 //height = Math.floorDiv(y,room.furniture_canvas.gridsize)*room.furniture_canvas.gridsize-initialY;
                 height = room.get_grid_coords(y)-initialY;
@@ -290,7 +323,6 @@ public class Opening_MouseAdapter extends MouseAdapter {
         System.out.println("ending coords:"+(initialX+panel.getWidth())+" "+(initialY+panel.getHeight()));
         room.setComponentZOrder(room.furniture_canvas,0);
         room.repaint();
-
     }
     public void remove_opening(){
         room.remove(panel);
@@ -302,8 +334,17 @@ public class Opening_MouseAdapter extends MouseAdapter {
     }
     //door
 }
-class SpaceType{
-    Opening type;
+class ConnectedSpace{
 
-
+    int lower;
+    int upper;
+    Room room;
+    public ConnectedSpace( int lower, int upper,Room room){
+        this.lower = lower;
+        this.upper = upper;
+        this.room = room;
+    }
+    public int getLower(){
+        return lower;
+    }
 }
