@@ -13,6 +13,7 @@ import java.util.Iterator;
 public class Room extends JPanel {
     public String room_type;
 
+
     public ArrayList<Opening> openings = new ArrayList<>();
     public ArrayList<Room> furnitures = new ArrayList<Room>();
 
@@ -27,8 +28,8 @@ public class Room extends JPanel {
     public int borderwidth;
     int gridSize;
 
-
     public Color color;
+
     // popup menu
     JPopupMenu popup = new JPopupMenu();
     JMenuItem rotate = new JMenuItem("Rotate");
@@ -70,319 +71,26 @@ public class Room extends JPanel {
     JMenuItem remove_room = new JMenuItem("Room");
     JMenuItem remove_furniture = new JMenuItem("Furniture");
 
-    public void orientation_options(String side){
-        switch(side){
-            case "Left":
-                orientation_popup.add(allign_top);
-                orientation_popup.add(allign_centerY);
-                orientation_popup.add(allign_bottom);
-                canvas.room_coords[0] = this.getX()-canvas.standard_room_width;
-                break;
-            case "Right":
-                orientation_popup.add(allign_top);
-                orientation_popup.add(allign_centerY);
-                orientation_popup.add(allign_bottom);
-                canvas.room_coords[0] = this.getX()+this.getWidth();
-                break;
-            case "Top":
-                orientation_popup.add(allign_left);
-                orientation_popup.add(allign_centerX);
-                orientation_popup.add(allign_right);
-                canvas.room_coords[1] = this.getY()-canvas.standard_room_height;
-                break;
-            case "Bottom":
-                orientation_popup.add(allign_left);
-                orientation_popup.add(allign_centerX);
-                orientation_popup.add(allign_right);
-                canvas.room_coords[1] = this.getY()+this.getHeight();
-        }
-        orientation_popup.show(canvas, this.getX(), this.getY());
-    }
 
-    public void alignment(String type){
-        switch(type){
-            case "left":
-
-                canvas.room_coords[0] = this.getX();
-                break;
-            case "right":
-                canvas.room_coords[0] = this.getX()+this.getWidth()-canvas.standard_room_width;
-                break;
-            case "top":
-                canvas.room_coords[1] = this.getY();
-                break;
-            case "bottom":
-                canvas.room_coords[1] = this.getY()+this.getHeight()-canvas.standard_room_height;
-                break;
-            case "centerX":
-                int newX = Math.floorDiv(canvas.standard_room_width/2,10)*10;
-                canvas.room_coords[0] = this.getX()+Math.floorDiv(this.getWidth()/2,10)*10-newX;
-                break;
-            case "centerY":
-                int newY = Math.floorDiv(canvas.standard_room_height/2,10)*10;
-                canvas.room_coords[1]= this.getY()+Math.floorDiv(this.getHeight()/2,10)*10-newY;
-                break;
-
-        }
-        //System.out.println("X,Y:"+getX()+","+getY()+" NewX,NewY:"+canvas.room_coords[0]+","+canvas.room_coords[1]);
-        canvas.wrt_room = true;
-        orientation_popup.removeAll();
-
-    }
-
-    public Room(Color color, Canvas canvass, int gridSize, int borderwidth) {
-        canvas = canvass;
-        this.gridSize = gridSize;
-        this.borderwidth = borderwidth;
-        this.color = color;
-
-
-        // Mouse adapter functionality - to move the room around
-        mouse = new MouseAdapter() {
-
-            boolean connected = false;
-            int X;
-            int Y;
-            int NewX;
-            int newY;
-            int initialX;
-            int initialY;
-
-            int connectionX;
-            int connectionY;
-            // get initial room coordinates and register mouse press coords
-
-            public void mousePressed(MouseEvent e) {
-                X = e.getX();
-                Y = e.getY();
-                initialX = getX(); // for overlap check
-                initialY = getY(); // for overlap check
-                //System.out.println("mouse pressed on"+e.getComponent());
-                //canvas.update_context_manager((Room)e.getComponent());
-                //System.out.println(e.getComponent().getBackground());
-            }
-
-            public void mouseDragged(MouseEvent e) {
-                for(int k=openings.size()-1;k>=0;k--){
-                    openings.get(k).remove();
-                }
-                /*
-                Iterator<Opening> openingz = openings.iterator();
-                while(openingz.hasNext()){
-                    Opening current = openingz.next();
-                    current.remove();
-                    if(current.connected){
-                    current.adjacentRoom.openings.remove(current.adjacentopening);}
-                    openingz.remove();
-                }
-
-                 */
-
-                // set location
-                Nearby nearbyroom = isroomnearby(); // check if a room is nearby or not
-
-                // if there is a room nearby
-                if (nearbyroom != null) {
-                    // if the room is NOT connected to another room
-                    if (!connected) {
-                        switch(nearbyroom.side){
-                            case "l":
-                                NewX=nearbyroom.room.getX()+nearbyroom.room.getWidth();
-                                // change this
-                                //newY = Math.floorDiv(getY() + e.getY() - Y, gridSize) * gridSize;
-                                newY = get_grid_coords(getY()+e.getY()-Y);
-                                //snap = snap((2*getY()+getHeight())/2,nearbyroom.room.getY(),nearbyroom.room.getY()+nearbyroom.room.getHeight());
-                                //if (snap!=-1){
-                                //    newY = snap;}
-                                connected = true;
-                                connectionX = e.getX();
-                                break;
-
-                            case "t":
-                                newY = nearbyroom.room.getY()+nearbyroom.room.getHeight();
-                                // change this
-                                //NewX = Math.floorDiv(getX() + e.getX() - X, gridSize) * gridSize;
-                                NewX = get_grid_coords(getX()+e.getX()-X);
-                                //snap = snap((2*getX()+getWidth())/2,nearbyroom.room.getX(),nearbyroom.room.getX()+nearbyroom.room.getWidth());
-                                //if (snap!=-1){
-                                //    NewX = snap;}
-                                connected = true;
-                                connectionY = e.getY();
-                                break;
-                            case "r":
-                                NewX = nearbyroom.room.getX()-getWidth();
-                                // change this
-                                //newY = Math.floorDiv(getY() + e.getY() - Y, gridSize) * gridSize;
-                                newY = get_grid_coords(getY()+e.getY()-Y);
-                                //snap = snap((2*getY()+getHeight())/2,nearbyroom.room.getY(),nearbyroom.room.getY()+nearbyroom.room.getHeight());
-                                //if (snap!=-1){
-                                //    newY = snap;}
-                                connected = true;
-                                connectionX = e.getX();
-                                break;
-                            case "b":
-                                newY = nearbyroom.room.getY()-getHeight();
-                                // change this
-                                //NewX = Math.floorDiv(getX() + e.getX() - X, gridSize) * gridSize;
-                                NewX = get_grid_coords(getX()+e.getX()-X);
-                                //snap = snap((2*getX()+getWidth())/2,nearbyroom.room.getX(),nearbyroom.room.getX()+nearbyroom.room.getWidth());
-                                //if (snap!=-1){
-                                //    NewX = snap;}
-                                connected = true;
-                                connectionY = e.getY();
-                                break;
-                        }
-                    }
-                    // the room is connected to another room
-                    else {
-                        String side = areconnected(nearbyroom.room);
-                        if (side == null) { // making sure there is room connected at some side (tb or s) top_bottom  or side
-                            System.out.println("\n\n\n\nwhat's happening here");
-                            connected = false; // we need to figure out why this line is holding back a weird bug
-                        } else {
-                            // checks to see that the mouse has moved enough to indicate that the user doesn't want to snap.
-                            // in which case we disengage the snap function
-                            switch (side) {
-                                case "l":
-                                    if (e.getX() - connectionX > 20 || e.getX() - connectionX < -20) {
-                                        // not connected anymore
-                                        connected = false;
-                                        // regular coords mechanism
-                                        // find new x coord wrt grid size
-                                        //NewX = Math.floorDiv(getX() + e.getX() - X, gridSize) * gridSize;
-                                        NewX = get_grid_coords(getX() + e.getX() - X);
-                                        // find new y coord wrt grid size
-                                        //newY = Math.floorDiv(getY() + e.getY() - Y, gridSize) * gridSize;
-                                        newY = get_grid_coords(getY() + e.getY() - Y);
-                                    } else {
-                                        //newY = Math.floorDiv(getY() + e.getY() - Y, gridSize) * gridSize;
-                                        newY = get_grid_coords(getY() + e.getY() - Y);
-                                    }
-                                    break;
-                                case "r":
-                                    if (e.getX() - connectionX > 20 || e.getX() - connectionX < -20) {
-                                        // not connected anymore
-                                        connected = false;
-                                        // regular coords mechanism
-                                        // find new x coord wrt grid size
-                                        //NewX = Math.floorDiv(getX() + e.getX() - X, gridSize) * gridSize;
-                                        NewX = get_grid_coords(getX() + e.getX() - X);
-                                        // find new y coord wrt grid size
-                                        //newY = Math.floorDiv(getY() + e.getY() - Y, gridSize) * gridSize;
-                                        newY = get_grid_coords(getY() + e.getY() - Y);
-                                    } else {
-                                        //newY = Math.floorDiv(getY() + e.getY() - Y, gridSize) * gridSize;
-                                        newY = get_grid_coords(getY() + e.getY() - Y);
-                                    }
-                                    break;
-                                case "t":
-                                    if (e.getY() - connectionY > 20 || e.getY() - connectionY < -20) {
-                                        // not connected anymore
-                                        connected = false;
-                                        // regular coords mechanism
-                                        // find new x coord wrt grid size
-                                        //NewX = Math.floorDiv(getX() + e.getX() - X, gridSize) * gridSize;
-                                        NewX = get_grid_coords(getX() + e.getX() - X);
-                                        // find new y coord wrt grid size
-                                        //newY = Math.floorDiv(getY() + e.getY() - Y, gridSize) * gridSize;
-                                        newY = get_grid_coords(getY() + e.getY() - Y);
-                                    } else {
-                                        //NewX = Math.floorDiv(getX() + e.getX() - X, gridSize) * gridSize;
-                                        NewX = get_grid_coords(getX() + e.getX() - X);
-                                    }
-                                    break;
-                                case "b":
-                                    if (e.getY() - connectionY > 20 || e.getY() - connectionY < -20) {
-                                        // not connected anymore
-                                        connected = false;
-                                        // regular coords mechanism
-                                        // find new x coord wrt grid size
-                                        //NewX = Math.floorDiv(getX() + e.getX() - X, gridSize) * gridSize;
-                                        NewX = get_grid_coords(getX() + e.getX() - X);
-                                        // find new y coord wrt grid size
-                                        //newY = Math.floorDiv(getY() + e.getY() - Y, gridSize) * gridSize;
-                                        newY = get_grid_coords(getY() + e.getY() - Y);
-                                    } else {
-                                        //NewX = Math.floorDiv(getX() + e.getX() - X, gridSize) * gridSize;
-                                        NewX = get_grid_coords(getX() + e.getX() - X);
-                                    }
-                                    break;
-
-                            }
-
-                        }
-                    }
-
-                    //System.out.println("nearbyroom,"+nearbyroom.side+" "+e.getX()+" "+e.getY());
-
-                }
-                // there is no room nearby
-                else{
-                    // find new x coord wrt grid size
-                    //NewX = Math.floorDiv(getX() + e.getX() - X, gridSize) * gridSize;
-                    NewX = get_grid_coords(getX() + e.getX() - X);
-                    // find new y coord wrt grid size
-                    //newY = Math.floorDiv(getY() + e.getY() - Y, gridSize) * gridSize;
-                    newY = get_grid_coords(getY() + e.getY() - Y);
-
-                }
-
-
-                setLocation(NewX, newY);
-                //canvas.update_context_manager((Room)e.getComponent());
-                //int moveX = NewX - getX();
-                //int moveY = newY-getY();
-
-                // makes sure the object being moved around is on top. (z axis wise)
-                canvas.setComponentZOrder(e.getComponent(), 0);
-            }
-
-            @Override
-            // overlap check goes here
-            public void mouseReleased(MouseEvent e) {
-                if (room_overlap()) {
-                    //System.out.println("room overlap");
-                    setLocation(initialX, initialY);
-                    Canvas.showDialog(canvas.frame,"ROOM OVERLAP!");
-                    //canvas.update_context_manager((Room)e.getComponent());
-                } else {
-                    //canvas.update_context_manager((Room)e.getComponent());
-                    //System.out.println("room not overlap");
-                }
-            }
-
-            // rightclick to get options pane // this or have a panel on the left side of the screen (discuss with hanes and varun)
-            public void mouseClicked(MouseEvent e) {
-                // check for right click
-                if (SwingUtilities.isRightMouseButton(e)) {
-                    popup.show(canvas, e.getComponent().getX(), e.getComponent().getY());
-
-
-                    //System.out.println("RIGHT CLICKKKK");
-                }
-
-            }
-        };
-        addMouseListener(mouse); // to register clicks
-        addMouseMotionListener(mouse); // to register drag
-
-        //Basic setup
-        setLayout(null);
-        setSize(100, 50);
-        setPreferredSize(new Dimension(100, 50));
-        setBackground(color);
-        setVisible(true);
-
+    public void setFurnitureCanvas(){
         furniture_canvas = new Canvas();
         furniture_canvas.furniture_canvas=true;
         furniture_canvas.set_color(color);
         furniture_canvas.setLocation(borderwidth, borderwidth);
         furniture_canvas.setSize(getWidth()-borderwidth*2, getHeight()-borderwidth*2);
         furniture_canvas.setVisible(true);
-
-        // borders
-        this.setBorder(BorderFactory.createLineBorder(Color.BLACK, borderwidth));
         furniture_canvas.setBorder(BorderFactory.createLineBorder(color, 0));
+        add(furniture_canvas);
+    }
+    public void setPopupMenu(){
+
+        popup.add(rotate);
+        popup.add(delete);
+        popup.add(add_room);
+        popup.add(furniture);
+        popup.add(door);
+        popup.add(window);
+        popup.add(resize);
 
         // initialising side popup
         side_popup.add(left);
@@ -392,7 +100,7 @@ public class Room extends JPanel {
 
         // initialising rightclick popup:
         // rotate option
-        popup.add(rotate);
+
         rotate.addActionListener(e -> {
             this.rotate();
         });
@@ -401,7 +109,7 @@ public class Room extends JPanel {
         delete_options.add(remove_room);
         delete_options.add(remove_opening);
         delete_options.add(remove_furniture);
-        popup.add(delete);
+
         delete.addActionListener(e -> {
             delete_options.show(canvas,this.getX(),this.getY());
         });
@@ -421,7 +129,7 @@ public class Room extends JPanel {
         });
 
         // add room segment
-        popup.add(add_room);
+
         add_room.addActionListener( e ->{
             side_popup.show(canvas, this.getX(), this.getY());
         });
@@ -457,11 +165,10 @@ public class Room extends JPanel {
         });
 
         // furniture pane TODO
-        popup.add(furniture);
+
 
         // door and windows popups
-        popup.add(door);
-        popup.add(window);
+
         door.addActionListener(e -> {
             opening_type.setText("door");
             opening_type.setEnabled(false);
@@ -530,11 +237,8 @@ public class Room extends JPanel {
             repaint();
             revalidate();
         });
-
-
-
-
-
+    }
+    public void setHotCorners(){
         //  initialising hotcorners
         lt = new HotCorner(this, "lt", color,gridSize,borderwidth);
         lt.setBounds(borderwidth, borderwidth, 10, 10);
@@ -542,16 +246,115 @@ public class Room extends JPanel {
         rb = new HotCorner(this, "rb", color,gridSize,borderwidth);
         rb.setBounds(getWidth() - 10 - borderwidth, getHeight() - 10 - borderwidth, 10, 10);
         add(rb);
-        // adding furniture canvas
-        add(furniture_canvas);
+
+    }
+    public void rotate() {
+        setBounds(getX(), getY(), getHeight(), getWidth());
+        furniture_canvas.setSize(getWidth()-borderwidth*2, getHeight()-borderwidth*2);
+        rb.setLocation(getWidth() - 10 - borderwidth, getHeight() - 10 - borderwidth);
+        if(room_overlap()){
+            Canvas.showDialog(canvas.frame,"ROOM OVERLAP!");
+            setBounds(getX(),getY(),getHeight(),getWidth());
+            furniture_canvas.setSize(getWidth()-borderwidth*2, getHeight()-borderwidth*2);
+            rb.setLocation(getWidth() - 10 - borderwidth, getHeight() - 10 - borderwidth);
+        }
+        //canvas.update_context_manager(this);
+
+
+    }
+    public void setMovemouse(){
+        // Mouse adapter functionality - to move the room around
+        mouse = new Move(this);
+        addMouseListener(mouse); // to register clicks
+        addMouseMotionListener(mouse); // to register drag
+    }
+    public void setBasics(){
+        //Basic setup
+        setLayout(null);
+        setSize(100, 50);
+        setPreferredSize(new Dimension(100, 50));
+        // borders
+        this.setBorder(BorderFactory.createLineBorder(Color.BLACK, borderwidth));
+        setBackground(color);
+        setVisible(true);
+    }
+
+
+    public Room(Color color, Canvas canvass, int gridSize, int borderwidth) {
+        canvas = canvass;
+        this.gridSize = gridSize;
+        this.borderwidth = borderwidth;
+        this.color = color;
+
+        setBasics();
+        setMovemouse();
+        setHotCorners();
+        setFurnitureCanvas();
+        setPopupMenu();
 
         setComponentZOrder(furniture_canvas,0);
         setComponentZOrder(lt,1);
         setComponentZOrder(rb,1);
-
-
     }
+    // these functions should ideally not be overidden
+    public void orientation_options(String side){
+        switch(side){
+            case "Left":
+                orientation_popup.add(allign_top);
+                orientation_popup.add(allign_centerY);
+                orientation_popup.add(allign_bottom);
+                canvas.room_coords[0] = this.getX()-canvas.standard_room_width;
+                break;
+            case "Right":
+                orientation_popup.add(allign_top);
+                orientation_popup.add(allign_centerY);
+                orientation_popup.add(allign_bottom);
+                canvas.room_coords[0] = this.getX()+this.getWidth();
+                break;
+            case "Top":
+                orientation_popup.add(allign_left);
+                orientation_popup.add(allign_centerX);
+                orientation_popup.add(allign_right);
+                canvas.room_coords[1] = this.getY()-canvas.standard_room_height;
+                break;
+            case "Bottom":
+                orientation_popup.add(allign_left);
+                orientation_popup.add(allign_centerX);
+                orientation_popup.add(allign_right);
+                canvas.room_coords[1] = this.getY()+this.getHeight();
+        }
+        orientation_popup.show(canvas, this.getX(), this.getY());
+    } // Add side popup
+    public void alignment(String type){
+        switch(type){
+            case "left":
 
+                canvas.room_coords[0] = this.getX();
+                break;
+            case "right":
+                canvas.room_coords[0] = this.getX()+this.getWidth()-canvas.standard_room_width;
+                break;
+            case "top":
+                canvas.room_coords[1] = this.getY();
+                break;
+            case "bottom":
+                canvas.room_coords[1] = this.getY()+this.getHeight()-canvas.standard_room_height;
+                break;
+            case "centerX":
+                int newX = Math.floorDiv(canvas.standard_room_width/2,10)*10;
+                canvas.room_coords[0] = this.getX()+Math.floorDiv(this.getWidth()/2,10)*10-newX;
+                break;
+            case "centerY":
+                int newY = Math.floorDiv(canvas.standard_room_height/2,10)*10;
+                canvas.room_coords[1]= this.getY()+Math.floorDiv(this.getHeight()/2,10)*10-newY;
+                break;
+
+        }
+        //System.out.println("X,Y:"+getX()+","+getY()+" NewX,NewY:"+canvas.room_coords[0]+","+canvas.room_coords[1]);
+        canvas.wrt_room = true;
+        orientation_popup.removeAll();
+
+    }           // add alignment popup
     public void remove_hotcorner_listner(){
         lt.removeMouseListener(lt.hotcornermouse);
         lt.removeMouseMotionListener(lt.hotcornermouse);
@@ -565,22 +368,6 @@ public class Room extends JPanel {
         rb.addMouseListener(rb.hotcornermouse);
         rb.addMouseMotionListener(rb.hotcornermouse);
     }
-    // rotate room - toDO incomplete
-    public void rotate() {
-        setBounds(getX(), getY(), getHeight(), getWidth());
-        furniture_canvas.setSize(getWidth()-borderwidth*2, getHeight()-borderwidth*2);
-        rb.setLocation(getWidth() - 10 - borderwidth, getHeight() - 10 - borderwidth);
-        if(room_overlap()){
-            canvas.showDialog(canvas.frame,"ROOM OVERLAP!");
-            setBounds(getX(),getY(),getHeight(),getWidth());
-            furniture_canvas.setSize(getWidth()-borderwidth*2, getHeight()-borderwidth*2);
-            rb.setLocation(getWidth() - 10 - borderwidth, getHeight() - 10 - borderwidth);
-        }
-        //canvas.update_context_manager(this);
-
-
-    }
-    // room overlap checker
     public  boolean room_overlap() {
         int lt_roomX = getX();
         int lt_roomY = getY();
@@ -608,12 +395,10 @@ public class Room extends JPanel {
 
         return overlap;
     }
-    // generic overlap
     public boolean overlap(int ltx1, int lty1, int rbx1, int rby1, int ltx2, int lty2, int rbx2, int rby2) {
 
         return (ltx1 < rbx2 && rbx1 > ltx2 && lty1 < rby2 && rby1 > lty2);
     }
-    // check if the rooms are connected
     public String areconnected(Room room){
 
         // bottom                               // top
@@ -636,9 +421,41 @@ public class Room extends JPanel {
 
         return null;
     }
+    public boolean intersection(int lt1,int lt2, int rb1, int rb2){
+        // here the variables are called lt1, rb1 not to indicate said points, but to reference that
+        // variable should contain the coords of the leftmost OR the topmost coordinate of the rect
+        int upper=Math.max(lt1, lt2);
+        int lower=Math.min(rb1, rb2);
+        return lower-upper> 0;
 
+    } // common length between 2 nearby rooms
+    public int snap(int center, int lt, int rb){
+        if (center-lt>rb-center && rb-center<=20){
 
-    // check for nearby rooms
+            return rb;
+        }else if (center-lt<rb-center && rb-center<=20){
+            return lt;
+        }else if(2*center-(lt+rb)<10 &&2*center-(lt+rb)>-10){
+            return (lt+rb)/2;
+        }
+        return -1;
+
+    }    // snap to nearby panels
+    public int get_grid_coords(int x){
+        int newX = Math.floorDiv(x,gridSize)*gridSize;
+        if(canvas.furniture_canvas){
+            newX-=borderwidth;}
+        return  newX;
+    }    // convert standard coords to grid (grid snap)
+    static class Nearby {
+        String side;
+        Room room;
+
+        public Nearby(String side, Room room) {
+            this.side = side;
+            this.room = room;
+        }
+    }
     public Nearby isroomnearby() {
 
         for (Room room : canvas.rooms) {
@@ -692,51 +509,18 @@ public class Room extends JPanel {
         return null;
 
 
-    }
+    }    // check for nearby panels
     // get the intersection of the sides
-    public boolean intersection(int lt1,int lt2, int rb1, int rb2){
-        // here the variables are called lt1, rb1 not to indicate said points, but to reference that
-        // variable should contain the coords of the leftmost OR the topmost coordinate of the rect
-        int upper=Math.max(lt1, lt2);
-        int lower=Math.min(rb1, rb2);
-        return lower-upper> 0;
 
-    }
-    // snap to nearby panels
-    public int snap(int center, int lt, int rb){
-        if (center-lt>rb-center && rb-center<=20){
 
-            return rb;
-        }else if (center-lt<rb-center && rb-center<=20){
-            return lt;
-        }else if(2*center-(lt+rb)<10 &&2*center-(lt+rb)>-10){
-            return (lt+rb)/2;
-        }
-        return -1;
 
-    }
-    // check for nearby panels
-    static class Nearby {
-        String side;
-        Room room;
 
-        public Nearby(String side, Room room) {
-            this.side = side;
-            this.room = room;
-        }
-    }
-    public int get_grid_coords(int x){
-        int newX = Math.floorDiv(x,gridSize)*gridSize;
-        if(canvas.furniture_canvas){
-            newX-=borderwidth;}
-        return  newX;
-    }
 
 }
 
 
 
-
+/*
 class HotCorner extends JPanel {
     int gridSize;
     int borderwidth;
@@ -901,6 +685,6 @@ class HotCorner extends JPanel {
         addMouseMotionListener(hotcornermouse);
     }
 }
-
+*/
 
 

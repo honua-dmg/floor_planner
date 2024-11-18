@@ -70,7 +70,7 @@ public class Opening_MouseAdapter extends MouseAdapter {
     // get bounds
         switch(side){
             case "t":
-                System.out.println(connectedRooms.top);
+                //System.out.println(connectedRooms.top);
                 if(connectedRooms.top.isEmpty()){
                     bounds.add(0);
                     bounds.add(room.getWidth());
@@ -88,7 +88,7 @@ public class Opening_MouseAdapter extends MouseAdapter {
                 Collections.sort(bounds);
                 break;
             case "b":
-                System.out.println(connectedRooms.bottom);
+                //System.out.println(connectedRooms.bottom);
                 if(connectedRooms.bottom.isEmpty()){
                     bounds.add(0);
                     bounds.add(room.getWidth());
@@ -106,7 +106,7 @@ public class Opening_MouseAdapter extends MouseAdapter {
                 Collections.sort(bounds);
                 break;
             case "r":
-                System.out.println(connectedRooms.right);
+                //System.out.println(connectedRooms.right);
                 if(connectedRooms.right.isEmpty()){
                     bounds.add(0);
                     bounds.add(room.getHeight());
@@ -125,7 +125,7 @@ public class Opening_MouseAdapter extends MouseAdapter {
 
                 break;
             case "l":
-                System.out.println(connectedRooms.left);
+                //System.out.println(connectedRooms.left);
                 if(connectedRooms.left.isEmpty()){
                     bounds.add(0);
                     bounds.add(room.getHeight());
@@ -144,7 +144,7 @@ public class Opening_MouseAdapter extends MouseAdapter {
                 break;
         }
 
-        System.out.println("Door added!");
+        //System.out.println("Door added!");
     }
     public void add_bounds(int con_room_coord,int cont_room_len,int room_coord,int room_len){
         int lower;
@@ -263,7 +263,7 @@ public class Opening_MouseAdapter extends MouseAdapter {
                         upperbound = bounds.get(bounds.indexOf(bound)+1);
                     }
                 }
-                System.out.println("B selected");
+                //System.out.println("B selected");
 
                 //initialX = Math.floorDiv(x,room.furniture_canvas.gridsize)*room.furniture_canvas.gridsize;
                 initialX = room.get_grid_coords(x);
@@ -299,7 +299,7 @@ public class Opening_MouseAdapter extends MouseAdapter {
                         upperbound = bounds.get(bounds.indexOf(bound)+1);
                     }
                 }
-                System.out.println("L selected");
+                //System.out.println("L selected");
                 //initialY = Math.floorDiv(y,room.furniture_canvas.gridsize)*room.furniture_canvas.gridsize;
                 initialY = room.get_grid_coords(y);
                 initialX = 0;
@@ -333,7 +333,7 @@ public class Opening_MouseAdapter extends MouseAdapter {
                         upperbound = bounds.get(bounds.indexOf(bound)+1);
                     }
                 }
-                System.out.println("R selected");
+                //System.out.println("R selected");
                 //initialY = Math.floorDiv(y,room.furniture_canvas.gridsize)*room.furniture_canvas.gridsize;
                 initialY = room.get_grid_coords(y);
                 initialX = room.getWidth()-panel_size;
@@ -363,8 +363,8 @@ public class Opening_MouseAdapter extends MouseAdapter {
             panel.adjacentopening.setBackground(panel.adjacentRoom.color);
         }
 
-        System.out.println("bounds:"+lowerbound+","+upperbound);
-        System.out.println(bounds);
+        //System.out.println("bounds:"+lowerbound+","+upperbound);
+        //System.out.println(bounds);
     }
     public void mouseDragged(MouseEvent e) {
         int x = e.getX();
@@ -472,9 +472,21 @@ public class Opening_MouseAdapter extends MouseAdapter {
         panel.repaint();
     }
     public void mouseReleased(MouseEvent e) {
-
-
         room.openings.add(panel);
+        if(panel.overlap()) {
+
+            Canvas.showDialog(canvas.frame,"Opening OVERLAP!");
+            panel.remove();
+            System.out.println(room.openings);
+
+
+        }else{
+            System.out.println("opening no OVERLAP");
+
+        }
+        System.out.println(room.openings.size());
+
+
 
         room.removeMouseListener(this);
         room.removeMouseMotionListener(this);
@@ -482,7 +494,7 @@ public class Opening_MouseAdapter extends MouseAdapter {
         room.addMouseMotionListener(room.mouse);
         room.add_hotcorner_listner();
         room.opening_popup.removeAll();
-        System.out.println("ending coords:"+(initialX+panel.getWidth())+" "+(initialY+panel.getHeight()));
+        //System.out.println("ending coords:"+(initialX+panel.getWidth())+" "+(initialY+panel.getHeight()));
         room.setComponentZOrder(room.furniture_canvas,0);
         room.repaint();
     }

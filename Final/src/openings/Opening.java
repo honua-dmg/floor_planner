@@ -21,11 +21,8 @@ public class Opening extends JPanel {
     public Opening(Room room,String type) {
         this.room = room;
         this.type = type;
+    }
 
-    }
-    public void setType(String type) {
-        this.type = type;
-    }
     protected void paintComponent(Graphics g){
         super.paintComponent(g);
     }
@@ -59,24 +56,42 @@ public class Opening extends JPanel {
         room.remove(this);
         room.repaint();
     }
-    public Boolean equals(Opening opening){
-        return room.getX()==opening.room.getX() && room.getY()==opening.room.getY();
 
-    }
     public Boolean overlap(){
+        //System.out.println("Before loop");
+        //System.out.println(getWidth()+" "+getHeight());
         for(Opening x:room.openings){
-            if(this.equals(x)){
+            if(x==this){
+                //System.out.println("same room");
                 continue;
             }
-            if(type.equals("t") || type.equals("b")){
-                if(getX()<x.getX() && getWidth()>-getX()+x.getX()){
+            //System.out.println("IN LOOP");
+            //System.out.println(x.getWidth()+" "+x.getHeight());
+
+            if (this.getHeight() == room.borderwidth && this.getY()==x.getY()) { // Horizontal check
+                System.out.println("HORIZONTQLA");
+                if (this.getX() < x.getX() + x.getWidth() && this.getX() + this.getWidth() > x.getX()) {
+                    return true; // Horizontal overlap
+                }
+            }
+            if (this.getWidth() == room.borderwidth && this.getX()==x.getX()) { // Vertical check
+                System.out.println("VERTIQUIOLA");
+                if (this.getY() < x.getY() + x.getHeight() && this.getY() + this.getHeight() > x.getY()) {
+                    return true; // Vertical overlap
+                }
+            }
+            /*
+            if(this.getHeight()==room.borderwidth){
+                System.out.println("horizontal");
+                if(getX()<=x.getX() && getWidth()>=-getX()+x.getX()){
                     return true;
                 }
                 if(x.getX()<getX()&& x.getWidth()>getX()-x.getX()){
                     return true;
                 }
             }
-            if(type.equals("l") || type.equals("r")){
+            if(this.getWidth()==room.borderwidth){
+                System.out.println("vertical");
                 if(getY()<x.getY() && getHeight()>-getY()+x.getY()){
                     return true;
                 }
@@ -84,6 +99,8 @@ public class Opening extends JPanel {
                     return true;
                 }
             }
+
+             */
         }
 
         return false;
@@ -111,9 +128,11 @@ class Adapter extends MouseAdapter {
     public void mousePressed(MouseEvent e) {
 
         System.out.println("Opening clicked ON!");
-        opening.adjacentRoom.openings.remove(opening.adjacentopening);
-        opening.adjacentRoom.remove(opening.adjacentopening);
-        opening.adjacentRoom.repaint();
+        if(opening.connected) {
+            opening.adjacentRoom.openings.remove(opening.adjacentopening);
+            opening.adjacentRoom.remove(opening.adjacentopening);
+            opening.adjacentRoom.repaint();
+        }
         room.openings.remove(opening);
         room.remove(opening);
         room.repaint();
@@ -122,16 +141,22 @@ class Adapter extends MouseAdapter {
             System.out.println(opening.type);
             if(opening.getHeight()==10){
                 opening.setSize(opening.getWidth(),room.borderwidth);
-                opening.adjacentopening.setSize(opening.getWidth(),room.borderwidth);
+                if(opening.connected){
+                opening.adjacentopening.setSize(opening.getWidth(),room.borderwidth);}
             }
             if(opening.getWidth()==10){
                 opening.setSize(room.borderwidth,opening.getHeight());
-                opening.adjacentopening.setSize(room.borderwidth,opening.getHeight());
+                if(opening.connected){
+                    opening.adjacentopening.setSize(room.borderwidth,opening.getHeight());
+                }
+
             }
 
             opening.setBorder(BorderFactory.createLineBorder(Color.PINK, 0));
-            opening.adjacentopening.setBorder(BorderFactory.createLineBorder(Color.PINK, 0));
-            opening.adjacentRoom.repaint();
+            if(opening.connected) {
+                opening.adjacentopening.setBorder(BorderFactory.createLineBorder(Color.PINK, 0));
+                opening.adjacentRoom.repaint();
+            }
             room.repaint();
             room.revalidate();
             opening.removeMouseListener(opening.adapter);
