@@ -9,5 +9,6 @@ public class Outside extends Room {
     // furniture list here
     public Outside(Canvas canvas, int gridSize, int borderwidth) {
         super(new Color(122,122,121), canvas, gridSize, borderwidth);
+        room_type = "outside";
     }
 }

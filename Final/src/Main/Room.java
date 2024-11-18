@@ -7,9 +7,11 @@ import java.awt.*;
 import java.awt.event.*;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 
 
 public class Room extends JPanel {
+    public String room_type;
 
     public ArrayList<Opening> openings = new ArrayList<>();
     public ArrayList<Room> furnitures = new ArrayList<Room>();
@@ -161,6 +163,20 @@ public class Room extends JPanel {
             }
 
             public void mouseDragged(MouseEvent e) {
+                for(int k=openings.size()-1;k>=0;k--){
+                    openings.get(k).remove();
+                }
+                /*
+                Iterator<Opening> openingz = openings.iterator();
+                while(openingz.hasNext()){
+                    Opening current = openingz.next();
+                    current.remove();
+                    if(current.connected){
+                    current.adjacentRoom.openings.remove(current.adjacentopening);}
+                    openingz.remove();
+                }
+
+                 */
 
                 // set location
                 Nearby nearbyroom = isroomnearby(); // check if a room is nearby or not
@@ -506,6 +522,11 @@ public class Room extends JPanel {
         resize.addActionListener(e -> {
             setComponentZOrder(lt, 0);
             setComponentZOrder(rb,0);
+            lt.addMouseListener(lt.hotcornermouse);
+            lt.addMouseMotionListener(lt.hotcornermouse);
+            rb.addMouseListener(rb.hotcornermouse);
+            rb.addMouseMotionListener(rb.hotcornermouse);
+
             repaint();
             revalidate();
         });

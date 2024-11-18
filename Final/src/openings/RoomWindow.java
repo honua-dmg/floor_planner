@@ -10,7 +10,8 @@ public class RoomWindow extends Opening {
     Boolean opp;
 
     public RoomWindow(Room room,String horizontal_or_vertical, Color color, Boolean opp) {
-        super(room);
+
+        super(room,"window");
         this.room_color = color;
         this.horizontal_or_vertical = horizontal_or_vertical;
         this.opp = opp;

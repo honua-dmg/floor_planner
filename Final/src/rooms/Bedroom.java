@@ -17,5 +17,6 @@ public class Bedroom extends Room{
     // furniture list here
     public Bedroom(Canvas canvas, int gridSize, int borderwidth) {
         super(new Color(103,189,170), canvas, gridSize, borderwidth);
+        room_type = "bedroom";
     }
 }
