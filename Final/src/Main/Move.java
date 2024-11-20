@@ -1,22 +1,27 @@
 package Main;
 
+import openings.Opening;
+
 import javax.swing.*;
+import javax.swing.border.LineBorder;
+import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
 public class Move extends MouseAdapter {
 
-boolean connected = false;
-int X;
-int Y;
-int NewX;
-int newY;
-int initialX;
-int initialY;
-Room room;
-int connectionX;
-int connectionY;
-String side;
+    boolean connected = false;
+    int X;
+    int Y;
+    int NewX;
+    int newY;
+    int initialX;
+    int initialY;
+    Room room;
+    int connectionX;
+    int connectionY;
+    Boolean dragged=false;
+    Room.Nearby nearbyroom;
 // get initial room coordinates and register mouse press coords
     public Move(Room room){
         this.room = room;
@@ -34,14 +39,14 @@ public void mousePressed(MouseEvent e) {
 
 public void mouseDragged(MouseEvent e) {
     // set location
-    Room.Nearby nearbyroom = room.isroomnearby(); // check if a room is nearby or not
+    nearbyroom = room.isroomnearby(); // check if a room is nearby or not
 
     // if there is a room nearby
     if (nearbyroom != null) {
-        side = nearbyroom.side;
+
         // if the room is NOT connected to another room
         if (!connected) {
-            switch(side){
+            switch(nearbyroom.side){
                 case "l":
                     NewX=nearbyroom.room.getX()+nearbyroom.room.getWidth();
                     // change this
@@ -92,13 +97,13 @@ public void mouseDragged(MouseEvent e) {
         // the room is connected to another room
         else {
             //String side = room.areconnected(nearbyroom.room);
-            if (side == null) { // making sure there is room connected at some side (tb or s) top_bottom  or side
+            if (nearbyroom.side == null) { // making sure there is room connected at some side (tb or s) top_bottom  or side
                 System.out.println("\n\n\n\nwhat's happening here");
                 connected = false; // we need to figure out why this line is holding back a weird bug
             } else {
                 // checks to see that the mouse has moved enough to indicate that the user doesn't want to snap.
                 // in which case we disengage the snap function
-                switch (side) {
+                switch (nearbyroom.side) {
                     case "l":
                         if (e.getX() - connectionX > 20 || e.getX() - connectionX < -20) {
                             // not connected anymore
@@ -186,9 +191,12 @@ public void mouseDragged(MouseEvent e) {
 
     room.setLocation(NewX, newY);
     if(NewX!=initialX|| newY!=initialY){
+        dragged=true;
         for(int k=room.openings.size()-1;k>=0;k--){
             room.openings.get(k).remove();
-        }}
+        }}else{
+        dragged=false;
+    }
 
 
 
@@ -209,8 +217,20 @@ public void mouseReleased(MouseEvent e) {
         Canvas.showDialog(room.canvas.frame,"ROOM OVERLAP!");
         //canvas.update_context_manager((Room)e.getComponent());
     } else {
+        if(dragged){
+        if(nearbyroom!=null){
+            for(int k=nearbyroom.room.openings.size()-1;k>=0;k--){
+                if(nearbyroom.room.openings.get(k).connected_room(room)!=null){
+                    nearbyroom.room.openings.get(k).remove();
+                    System.out.println("DOOR REMOVEDLDSKFJSDLKF");
+                };
+            }
+        }
+        // ensure that you can't place new rooms over existing windows
+
         //canvas.update_context_manager((Room)e.getComponent());
         //System.out.println("room not overlap");
+    }
     }
 }
 
@@ -220,6 +240,7 @@ public void mouseClicked(MouseEvent e) {
 
     if (SwingUtilities.isRightMouseButton(e)) {
         room.popup.show(room.canvas, e.getComponent().getX(), e.getComponent().getY());
+
 
 
         //System.out.println("RIGHT CLICKKKK");

@@ -13,8 +13,9 @@ public class Canvas extends JPanel {
     boolean wrt_room = false;
     public ArrayList<Room> rooms;
     public JFrame frame;
-    int standard_room_width = 100;
-    int standard_room_height = 50;
+    int standard_room_width ;
+    int standard_room_height ;
+
     public int gridsize=10;
     public int borderwidth=4;
 
@@ -24,6 +25,10 @@ public class Canvas extends JPanel {
         setSize(1200, 1000);
         setBackground(Color.WHITE);
         setVisible(true);
+
+        standard_room_width=100*2;
+        standard_room_height=50*2;
+
 
     }
 
@@ -54,15 +59,19 @@ public class Canvas extends JPanel {
 
         //System.out.println("\n\n"+x_coord + " " + y_coord + "  room added here\n\n");
         room.setBounds(x_coord, y_coord, standard_room_width, standard_room_height);
+        System.out.println(room.getWidth() + " " + room.getHeight());
 
         //setComponentZOrder(this, 0);
+        if(room.getX()+room.getWidth()>getWidth()) {
+            showDialog(this.frame,"No Space, move a room please!");
+            return;
+        }
 
         if(!room.room_overlap()){
             this.add(room);
             rooms.add(room);
         }else{
             showDialog(this.frame,"No Space, move a room please!");
-
         }
 
 
@@ -140,13 +149,7 @@ public class Canvas extends JPanel {
         return new int[]{-1, 0};
     }
     //}
-    /*
-    public static void main(String[]kwargs){
 
-        new tempFrame();
-
-    }
-    */
     protected void paintComponent(Graphics g) {
         super.paintComponent(g); // Call the superclass method to ensure proper painting
 
@@ -159,15 +162,14 @@ public class Canvas extends JPanel {
         // Draw the dot grid
         int x;
         int spacing;
-        if(furniture_canvas){
+        if(!furniture_canvas) {
             x = -borderwidth;
-        }else{
-            x = 0;
-        }
 
-        for (;x < getWidth(); x += gridsize*2) {
-            for (int y = 0; y < getHeight(); y += gridsize*2) {
-                g.fillOval(x - 1, y - 1, 2, 2); // Draw a dot (4x4 pixels)
+
+            for (; x < getWidth(); x += gridsize * 2) {
+                for (int y = 0; y < getHeight(); y += gridsize * 2) {
+                    g.fillOval(x - 1, y - 1, 2, 2); // Draw a dot (4x4 pixels)
+                }
             }
         }
 
@@ -178,45 +180,4 @@ public class Canvas extends JPanel {
 
 }
 
-/*
-class tempFrame extends JFrame {
-    Canvas canvasClass;
 
-    public tempFrame() {
-        setTitle("Canvas");
-        setSize(1100, 1000);
-        setLayout((new FlowLayout()));
-
-        setVisible(true);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        // creating canvas object
-        canvasClass = new Canvas();
-        // Buttons
-        JButton RedRoom = new JButton("Add Red Element");
-        add(RedRoom);
-        JButton BlueRoom = new JButton("Add Blue Element");
-        add(BlueRoom);
-
-        // Adding canvas to JFrame
-
-        canvasClass.setPreferredSize(new Dimension(1000, 1000));
-        add(canvasClass);
-
-        // Button elements
-        RedRoom.addActionListener(e -> {
-            canvasClass.addRoom(Color.RED);
-            System.out.println("  Room added");
-        });
-
-        BlueRoom.addActionListener(e -> {
-            canvasClass.addRoom(Color.BLUE);
-            System.out.println("  Room added");
-
-        });
-
-
-        pack();
-    }
-
-}
-*/

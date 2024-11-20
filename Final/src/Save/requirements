@@ -1,0 +1,50 @@
+// Type,x,y,len,wid-Door,x,y,len,wid;window,x,y,len,wid;-Furniture,x,y,len,wid
+Type,x,y,len,wid
+
+
+rooms:
+X,Y,width,Height;
+Furniture
+X,Y,Type,...,;
+Door
+X,Y,Type,Room,connected,adjRoom,adjDoor;
+
+newline will separate rooms
+
+for each room:
+- will separate room coords, Doors and Furniture
+
+; will separate individual doors and windows
+
+
+ To load:
+ split string by
+ split string by ;
+ [0] -> room info
+ [1] -> doors info
+        details separated by ,
+ [2] -> furniture info
+
+    rooms use add room on canvas
+    doors
+
+
+  doors:
+    check if room already has door (by virtue of adjacent
+
+
+
+- First load all the rooms into canvas arraylist (X,Y,width,Height,rotation,room_type)
+-load all the
+
+- we have to add furniture to furniture_canvas.rooms
+    initialise (X,Y,Type,rotation)
+
+- adding doors:
+    (X,Y,Type,connected)
+    check loop through and check for connections:
+
+
+
+
+

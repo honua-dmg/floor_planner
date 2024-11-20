@@ -68,81 +68,7 @@ public class Opening_MouseAdapter extends MouseAdapter {
         connectedRooms.sort();
 
     // get bounds
-        switch(side){
-            case "t":
-                //System.out.println(connectedRooms.top);
-                if(connectedRooms.top.isEmpty()){
-                    bounds.add(0);
-                    bounds.add(room.getWidth());
-                    break;
-                }
-                for(Room room1:connectedRooms.top){
-                    add_bounds(room1.getX(),room1.getWidth(),room.getX(),room.getWidth());
-
-
-                }
-                if(!bounds.contains(0)){
-                    bounds.add(0);}
-                if(!bounds.contains(room.getWidth())){
-                    bounds.add(room.getWidth());}
-                Collections.sort(bounds);
-                break;
-            case "b":
-                //System.out.println(connectedRooms.bottom);
-                if(connectedRooms.bottom.isEmpty()){
-                    bounds.add(0);
-                    bounds.add(room.getWidth());
-                    break;
-                }
-                for(Room room1:connectedRooms.bottom){
-                    add_bounds(room1.getX(),room1.getWidth(),room.getX(),room.getWidth());
-                }
-                if(!bounds.contains(0)){
-                    bounds.add(0);
-                }
-                if(!bounds.contains(room.getWidth())){
-                    bounds.add(room.getWidth());
-                }
-                Collections.sort(bounds);
-                break;
-            case "r":
-                //System.out.println(connectedRooms.right);
-                if(connectedRooms.right.isEmpty()){
-                    bounds.add(0);
-                    bounds.add(room.getHeight());
-                    break;
-                }
-                for(Room room1:connectedRooms.right){
-                    add_bounds(room1.getY(),room1.getHeight(),room.getY(),room.getHeight());
-                }
-                if(!bounds.contains(0)){
-                    bounds.add(0);
-                }
-                if(!bounds.contains(room.getHeight())){
-                    bounds.add(room.getHeight());
-                }
-                Collections.sort(bounds);
-
-                break;
-            case "l":
-                //System.out.println(connectedRooms.left);
-                if(connectedRooms.left.isEmpty()){
-                    bounds.add(0);
-                    bounds.add(room.getHeight());
-                    break;
-                }
-                for(Room room1:connectedRooms.left){
-                    add_bounds(room1.getY(),room1.getHeight(),room.getY(),room.getHeight());
-                }
-                if(!bounds.contains(0)){
-                    bounds.add(0);
-                }
-                if(!bounds.contains(room.getHeight())){
-                    bounds.add(room.getHeight());
-                }
-                Collections.sort(bounds);
-                break;
-        }
+        bounds = get_bounds(connectedRooms,side,room);
 
         //System.out.println("Door added!");
     }
@@ -506,6 +432,88 @@ public class Opening_MouseAdapter extends MouseAdapter {
         room.addMouseListener(room.mouse);
         room.addMouseMotionListener(room.mouse);
         room.add_hotcorner_listner();
+    }
+
+    public ArrayList<Integer> get_bounds(_ConnectedRooms connectedRooms,String side,Room room) {
+        ArrayList<Integer> bounds = new ArrayList<>();
+        switch (side) {
+            case "t":
+                //System.out.println(connectedRooms.top);
+                if (connectedRooms.top.isEmpty()) {
+                    bounds.add(0);
+                    bounds.add(room.getWidth());
+                    break;
+                }
+                for (Room room1 : connectedRooms.top) {
+                    add_bounds(room1.getX(), room1.getWidth(), room.getX(), room.getWidth());
+
+
+                }
+                if (!bounds.contains(0)) {
+                    bounds.add(0);
+                }
+                if (!bounds.contains(room.getWidth())) {
+                    bounds.add(room.getWidth());
+                }
+                Collections.sort(bounds);
+                break;
+            case "b":
+                //System.out.println(connectedRooms.bottom);
+                if (connectedRooms.bottom.isEmpty()) {
+                    bounds.add(0);
+                    bounds.add(room.getWidth());
+                    break;
+                }
+                for (Room room1 : connectedRooms.bottom) {
+                    add_bounds(room1.getX(), room1.getWidth(), room.getX(), room.getWidth());
+                }
+                if (!bounds.contains(0)) {
+                    bounds.add(0);
+                }
+                if (!bounds.contains(room.getWidth())) {
+                    bounds.add(room.getWidth());
+                }
+                Collections.sort(bounds);
+                break;
+            case "r":
+                //System.out.println(connectedRooms.right);
+                if (connectedRooms.right.isEmpty()) {
+                    bounds.add(0);
+                    bounds.add(room.getHeight());
+                    break;
+                }
+                for (Room room1 : connectedRooms.right) {
+                    add_bounds(room1.getY(), room1.getHeight(), room.getY(), room.getHeight());
+                }
+                if (!bounds.contains(0)) {
+                    bounds.add(0);
+                }
+                if (!bounds.contains(room.getHeight())) {
+                    bounds.add(room.getHeight());
+                }
+                Collections.sort(bounds);
+
+                break;
+            case "l":
+                //System.out.println(connectedRooms.left);
+                if (connectedRooms.left.isEmpty()) {
+                    bounds.add(0);
+                    bounds.add(room.getHeight());
+                    break;
+                }
+                for (Room room1 : connectedRooms.left) {
+                    add_bounds(room1.getY(), room1.getHeight(), room.getY(), room.getHeight());
+                }
+                if (!bounds.contains(0)) {
+                    bounds.add(0);
+                }
+                if (!bounds.contains(room.getHeight())) {
+                    bounds.add(room.getHeight());
+                }
+                Collections.sort(bounds);
+                break;
+        }
+        return bounds;
     }
     //door
 }

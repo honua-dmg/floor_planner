@@ -9,13 +9,25 @@ import java.awt.event.*;
 import java.util.ArrayList;
 import java.util.Iterator;
 
+import furnitures.Furniture;
+
 
 public class Room extends JPanel {
-    public String room_type;
-
-
+    // everything the save functions will need;
+    /*
+    getX()
+    getY()
+    direction
+    */
     public ArrayList<Opening> openings = new ArrayList<>();
-    public ArrayList<Room> furnitures = new ArrayList<Room>();
+    public int direction=0;
+
+
+    public String room_type;
+    public String[] available_furniture;
+
+
+
 
     public Canvas canvas;
     public Canvas furniture_canvas;
@@ -79,8 +91,13 @@ public class Room extends JPanel {
         furniture_canvas.setLocation(borderwidth, borderwidth);
         furniture_canvas.setSize(getWidth()-borderwidth*2, getHeight()-borderwidth*2);
         furniture_canvas.setVisible(true);
-        furniture_canvas.setBorder(BorderFactory.createLineBorder(color, 0));
-        add(furniture_canvas);
+        furniture_canvas.setBorder(BorderFactory.createLineBorder(Color.BLACK, 0));
+        furniture_canvas.standard_room_height=50;
+        furniture_canvas.standard_room_width=50;
+        this.add(furniture_canvas);
+        setComponentZOrder(furniture_canvas,0);
+        setComponentZOrder(lt,1);
+        setComponentZOrder(rb,1);
     }
     public void setPopupMenu(){
 
@@ -92,44 +109,15 @@ public class Room extends JPanel {
         popup.add(window);
         popup.add(resize);
 
+
         // initialising side popup
         side_popup.add(left);
         side_popup.add(right);
         side_popup.add(top);
         side_popup.add(bottom);
 
-        // initialising rightclick popup:
-        // rotate option
-
-        rotate.addActionListener(e -> {
-            this.rotate();
-        });
-
-        // delete option
-        delete_options.add(remove_room);
-        delete_options.add(remove_opening);
-        delete_options.add(remove_furniture);
-
-        delete.addActionListener(e -> {
-            delete_options.show(canvas,this.getX(),this.getY());
-        });
-        remove_room.addActionListener(e -> {
-            canvas.remove(this);
-            canvas.rooms.remove(this);
-            canvas.revalidate();
-            canvas.repaint();
-        });
-        remove_opening.addActionListener(e -> {
-            // highlight (white border) all openings, bring them forward
-            for(Opening opening: openings){
-                System.out.println(opening.toString());
-
-                opening.add_listener();
-            }
-        });
-
+        //add relative room
         // add room segment
-
         add_room.addActionListener( e ->{
             side_popup.show(canvas, this.getX(), this.getY());
         });
@@ -164,7 +152,59 @@ public class Room extends JPanel {
             alignment("bottom");
         });
 
+
+        // initialising rightclick popup:
+        // rotate option
+
+        rotate.addActionListener(e -> {
+            this.rotate();
+        });
+
+        // delete option
+        delete_options.add(remove_room);
+        delete_options.add(remove_opening);
+        delete_options.add(remove_furniture);
+
+        delete.addActionListener(e -> {
+            delete_options.show(canvas,this.getX(),this.getY());
+        });
+        remove_room.addActionListener(e -> {
+            canvas.rooms.remove(this);
+            canvas.remove(this);
+
+            canvas.revalidate();
+            canvas.repaint();
+        });
+        remove_opening.addActionListener(e -> {
+            // highlight (white border) all openings, bring them forward
+            for(Opening opening: openings){
+                System.out.println(opening.toString());
+
+                opening.add_listener();
+            }
+        });
+        remove_furniture.addActionListener(e -> {
+            for(Room furnitureZ: furniture_canvas.rooms){
+                furnitureZ.add_delete_listener();
+                System.out.println("DELETE ADDED!");
+            }
+        });
+
+
         // furniture pane TODO
+        JPopupMenu furniture_list = new JPopupMenu();
+
+        JMenuItem test = new JMenuItem("Test"); // will be added from the available furniture list
+        furniture_list.add(test);
+
+        furniture.addActionListener(e -> {
+            furniture_list.show(canvas,this.getX(),this.getY());
+        });
+        test.addActionListener(e -> {
+            furniture_canvas.standard_room_height = Furniture.height;
+            furniture_canvas.standard_room_width = Furniture.width;
+            furniture_canvas.addRoom(new Furniture(furniture_canvas));
+        });
 
 
         // door and windows popups
@@ -229,16 +269,19 @@ public class Room extends JPanel {
         resize.addActionListener(e -> {
             setComponentZOrder(lt, 0);
             setComponentZOrder(rb,0);
+            /*
             lt.addMouseListener(lt.hotcornermouse);
             lt.addMouseMotionListener(lt.hotcornermouse);
             rb.addMouseListener(rb.hotcornermouse);
             rb.addMouseMotionListener(rb.hotcornermouse);
-
+            */
             repaint();
-            revalidate();
+            //revalidate();
         });
+
     }
     public void setHotCorners(){
+        System.out.println(getWidth()+" "+getHeight());
         //  initialising hotcorners
         lt = new HotCorner(this, "lt", color,gridSize,borderwidth);
         lt.setBounds(borderwidth, borderwidth, 10, 10);
@@ -257,7 +300,10 @@ public class Room extends JPanel {
             setBounds(getX(),getY(),getHeight(),getWidth());
             furniture_canvas.setSize(getWidth()-borderwidth*2, getHeight()-borderwidth*2);
             rb.setLocation(getWidth() - 10 - borderwidth, getHeight() - 10 - borderwidth);
+            return;
         }
+        direction+=90;
+        direction %= 360;
         //canvas.update_context_manager(this);
 
 
@@ -271,8 +317,8 @@ public class Room extends JPanel {
     public void setBasics(){
         //Basic setup
         setLayout(null);
-        setSize(100, 50);
-        setPreferredSize(new Dimension(100, 50));
+        setSize(canvas.standard_room_width, canvas.standard_room_height);
+        setPreferredSize(new Dimension(canvas.standard_room_width, canvas.standard_room_height));
         // borders
         this.setBorder(BorderFactory.createLineBorder(Color.BLACK, borderwidth));
         setBackground(color);
@@ -285,16 +331,12 @@ public class Room extends JPanel {
         this.gridSize = gridSize;
         this.borderwidth = borderwidth;
         this.color = color;
-
+        //this.setBounds(0,0,canvas.getWidth(),canvas.getHeight());
         setBasics();
         setMovemouse();
         setHotCorners();
         setFurnitureCanvas();
         setPopupMenu();
-
-        setComponentZOrder(furniture_canvas,0);
-        setComponentZOrder(lt,1);
-        setComponentZOrder(rb,1);
     }
     // these functions should ideally not be overidden
     public void orientation_options(String side){
@@ -363,6 +405,7 @@ public class Room extends JPanel {
 
     }
     public void add_hotcorner_listner(){
+
         lt.addMouseListener(lt.hotcornermouse);
         lt.addMouseMotionListener(lt.hotcornermouse);
         rb.addMouseListener(rb.hotcornermouse);
@@ -512,6 +555,7 @@ public class Room extends JPanel {
     }    // check for nearby panels
     // get the intersection of the sides
 
+    public void add_delete_listener(){}
 
 
 

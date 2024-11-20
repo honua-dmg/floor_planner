@@ -4,14 +4,16 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.ArrayList;
 
 import Main.Canvas;
 import Main.Room;
+import Main._ConnectedRooms;
 
 public class Opening extends JPanel {
     //Boolean delete_toggle = false;
-    public Boolean connected=false;               //*** in saving
-    String type;                            //*** in saving
+    public Boolean connected=false;                         //*** in saving
+    String type;   // door/ window                         //*** in saving
     Room room;
     Adapter adapter;
     public Room adjacentRoom;
@@ -22,6 +24,7 @@ public class Opening extends JPanel {
         this.room = room;
         this.type = type;
     }
+
 
     protected void paintComponent(Graphics g){
         super.paintComponent(g);
@@ -80,6 +83,7 @@ public class Opening extends JPanel {
                     return true; // Vertical overlap
                 }
             }
+
             /*
             if(this.getHeight()==room.borderwidth){
                 System.out.println("horizontal");
@@ -104,6 +108,43 @@ public class Opening extends JPanel {
         }
 
         return false;
+    }
+    public String connected_room(Room connected_room){
+        // bottom                               // top
+        if(connected_room.getY()+connected_room.getHeight()==getY() +room.getY()){
+            //System.out.println("tb match;");
+            return "t";
+
+        }
+        if(room.getY()+getY()+getHeight()==connected_room.getY()){
+            return "b";
+        }
+        // left                            // right
+        if(connected_room.getX()==getX()+getWidth()+room.getX()) {
+            //System.out.println("s match;"+getY());
+            return "r";
+        }
+        if(room.getX()+getX()==connected_room.getX()+connected_room.getWidth()){
+            return "l";
+        }
+
+        return null;
+    }
+
+    public void connected_rooms(){
+        if(connected){
+            // we need to get the adjacent rooms canvas
+            ArrayList<Integer> bounds = new ArrayList<>();
+            _ConnectedRooms connectedRooms = new _ConnectedRooms();
+            for(Room x:room.canvas.rooms){
+                connectedRooms.add(x,room.areconnected(x));
+            }
+            connectedRooms.sort();
+
+
+
+
+        }
     }
 }
 
